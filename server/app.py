@@ -1,8 +1,6 @@
 import os
-from langchain_google_genai import GoogleGenerativeAI, GoogleGenerativeAIEmbeddings
-from langchain_community.vectorstores import FAISS
+from langchain_google_genai import GoogleGenerativeAI
 from langchain.prompts import PromptTemplate
-from langchain.chains.question_answering import load_qa_chain
 from langchain.chains.llm import LLMChain
 from dotenv import load_dotenv
 import logging
@@ -22,44 +20,44 @@ llm = GoogleGenerativeAI(
     max_tokens=100,
 )
 
-embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", google_api_key=GOOGLE_API_KEY)
+
+# not dealing with vector store now
+
+# def vector_store():
+#     try:
+#         if os.path.exists("faiss"):
+#             store = FAISS.load_local("faiss", embeddings=embeddings)
+#         else:
+#             store = FAISS.from_texts([""], embeddings=embeddings)
+#             store.save_local("faiss")
+#         return store
+#     except Exception as e:
+#         logger.error(f"Error initializing vector store: \n{e}")
+#         return None
 
 
-def vector_store():
-    try:
-        if os.path.exists("faiss"):
-            store = FAISS.load_local("faiss", embeddings=embeddings)
-        else:
-            store = FAISS.from_texts([""], embeddings=embeddings)
-            store.save_local("faiss")
-        return store
-    except Exception as e:
-        logger.error(f"Error initializing vector store: \n{e}")
-        return None
+
+# def add_to_vector_store(description: str):
+#     try:
+#         store = vector_store()
+#         store.add_texts([description])
+#         store.save_local("faiss")
+#         return True
+#     except Exception as e:
+#         logger.error(f"Error adding to vector store: \n{e}")
+#         return False
 
 
-
-def add_to_vector_store(description: str):
-    try:
-        store = vector_store()
-        store.add_texts([description])
-        store.save_local("faiss")
-        return True
-    except Exception as e:
-        logger.error(f"Error adding to vector store: \n{e}")
-        return False
-
-
-def update_vector_store(old_description: str, new_description: str):
-    try:
-        store = vector_store()
-        store.delete([old_description])
-        store.add_texts([new_description])
-        store.save_local("faiss")
-        return True
-    except Exception as e:
-        logger.error(f"Error updating vector store: \n{e}")
-        return False
+# def update_vector_store(old_description: str, new_description: str):
+#     try:
+#         store = vector_store()
+#         store.delete([old_description])
+#         store.add_texts([new_description])
+#         store.save_local("faiss")
+#         return True
+#     except Exception as e:
+#         logger.error(f"Error updating vector store: \n{e}")
+#         return False
 
 
 def chatbot(message: str, chatbot_id: str) -> str:

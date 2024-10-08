@@ -1,8 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+
 from app import chatbot, add_to_vector_store
-from db import new_user, get_user, change_description, new_chatbot, create_tables
+from db import new_user, get_user, new_chatbot, database
+from utils.models import CreateUser, CreateChatbot, ChatMessage
+
 import logging
 import uuid
 app = FastAPI()
@@ -16,34 +18,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-create_tables()
+database()
 
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class UserCreate(BaseModel):
-    email: str
-    password: str
-    website: str
-    description: str
 
-class ChatMessage(BaseModel):
-    message: str
-    chatbot_id: str
-
-class DescriptionUpdate(BaseModel):
-    email: str
-    description: str
-
-class ChatbotCreate(BaseModel):
-    user_mail: str
-    website: str
-    description: str
+    
+    
+@app.get("/")
+async def root():
+    return {"message": "Hello aWorld"}
 
 @app.post("/user")
-async def create_user(user: UserCreate):
-    result = new_user(user.email, user.password, user.website, user.description)
+async def create_user(user: CreateUser):
+    result = new_user(user.email, user.password)
     if result is True:
         add_to_vector_store(user.description)
         return {"message": "User created successfully"}
@@ -57,32 +47,25 @@ async def retrieve_user(email: str):
         return user
     raise HTTPException(status_code=404, detail="User not found")
 
-@app.post("/chatbot")
-async def create_chatbot(chatbot: ChatbotCreate):
-    chatbot_id = str(uuid.uuid4())
-    result = new_chatbot(chatbot_id, chatbot.user_email, chatbot.website, chatbot.description)
-    if result is True:
-        add_to_vector_store(chatbot.description, chatbot_id)
+@app.post("/create_chatbot")
+async def create_chatbot(chatbot: CreateChatbot):
+    result = new_chatbot(chatbot)
+    if result.success is True:
+        chatbot_id = result.chatbot_id
         script = f'<script src="https://embeddable.com/chatbot.js" data-id="{chatbot_id}"></script>'
         iframe = f'<iframe src="https://embeddable.com/chatbot/{chatbot_id}" width="300" height="400" frameborder="0"></iframe>'
         return {"chatbot_id": chatbot_id, "script": script, "iframe": iframe}
     else:
-        raise HTTPException(status_code=400, detail=result)
+        raise HTTPException(status_code=400, detail=result.message)
+
 
 @app.post("/chat")
 async def chat(message: ChatMessage):
     response = chatbot(message.message, message.chatbot_id)
     return {"response": response}
 
-@app.put("/description")
-async def update_description(update: DescriptionUpdate):
-    result = change_description(update.email, update.description)
-    if result is True:
-        add_to_vector_store(update.description)
-        return {"message": "Description updated successfully"}
-    else:
-        raise HTTPException(status_code=400, detail=result)
+
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="localhost", port=8000)

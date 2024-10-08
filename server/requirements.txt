@@ -1,0 +1,7 @@
+langchain_google_genai
+langchain
+"fastapi[standard]"
+dotenv
+psycopg2
+langchain-community
+logging

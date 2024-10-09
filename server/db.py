@@ -1,5 +1,5 @@
 import os
-import psycopg2
+import psycopg2.pool
 import logging
 from dotenv import load_dotenv
 from utils.models import CreateUser, CreateChatbot, ChatMessage
@@ -83,7 +83,6 @@ def database():
                     response TEXT NOT NULL,
                     created_at TIMESTAMPTZ DEFAULT NOW(),
                     FOREIGN KEY (chatbot_id) REFERENCES chatbots(id)
-                
                 """)
         logger.info("Tables created successfully.")
     except Exception as e:
@@ -92,7 +91,7 @@ def database():
 
 # CRUD
 
-def create_user(user: CreateUser) -> bool | str:
+def create_user_db(user: CreateUser) -> bool | str:
     try:
         with get_cursor() as cur:
             cur.execute(
@@ -106,7 +105,7 @@ def create_user(user: CreateUser) -> bool | str:
         return "Some error occurred"
 
 
-def create_chatbot(chatbot: CreateChatbot) -> bool | str:
+def create_chatbot_db(chatbot: CreateChatbot) -> bool | str:
     try:
         with get_cursor() as cur:
             cur.execute(
@@ -192,7 +191,6 @@ def get_chatbot(user_email: str) -> dict | str:
             chatbot = cur.fetchone()
             if chatbot:
                 return {
-                    "user_email": chatbot[1],
                     "website": chatbot[2],
                     "description": chatbot[3],
                     "greeting_message": chatbot[4],

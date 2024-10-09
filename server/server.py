@@ -2,10 +2,11 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from app import chatbot
-from db import create_user, create_chatbot, database
-
+# from db import create_user_db, create_chatbot_db, database, get_chatbot
+from utils.data import website1, website2
 from utils.models import CreateUser, CreateChatbot, ChatMessage
 import logging
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -17,7 +18,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-database()
+# database()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ async def root():
 
 @app.post("/user")
 async def create_user(user: CreateUser):
-    result = create_user(user.email, user.password)
+    result = create_user_db(user.email, user.password)
     if result is True:
         return {"success": True}
 
@@ -39,7 +40,7 @@ async def create_user(user: CreateUser):
 
 @app.post("/create-chatbot")
 async def create_chatbot(chatbot: CreateChatbot):
-    result = create_chatbot(chatbot)
+    result = create_chatbot_db(chatbot)
     if result.success is True:
         chatbot_id = result.chatbot_id
         script = f'<script src="http://localhost:5173/chatbot.js" data-id="{
@@ -50,12 +51,25 @@ async def create_chatbot(chatbot: CreateChatbot):
 
     return {"success": False, "message": result.message}
 
+class GetWebsiteDetails(BaseModel):
+    chatbot_id: str
+
+@app.post('/getwebsitedetails')
+async def get_website_details(request: GetWebsiteDetails):
+    try:
+        print(request.chatbot_id)
+        # chatbot = get_chatbot(chatbot_id)
+        return {"success": True, "website": website1}
+    except Exception as e:
+        logger.error(f"Error getting chatbot details: {e}")
+        return {"website": "", "description": ""}
+
 
 @app.post("/chat")
 async def chat(chat: ChatMessage):
     try:
-        response = chatbot(chat)
-        return {"response": response}
+        # response = chatbot(chat)
+        return {"response": "Hey i am chatbot"}
     except Exception as e:
         logger.error(f"Error chatting: {e}")
         return {"response": "Some error occurred"}

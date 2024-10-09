@@ -14,7 +14,6 @@ class CreateChatbot(BaseModel):
     
 
 class ChatMessage(BaseModel):
-    user_email: str
     chatbot_id: str
     customer_id: str
     message: str

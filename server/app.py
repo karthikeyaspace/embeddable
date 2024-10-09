@@ -4,7 +4,8 @@ from langchain.prompts import PromptTemplate
 from langchain.chains.llm import LLMChain
 from dotenv import load_dotenv
 import logging
-from db import get_website_description
+from db import get_website_description, get_chatbot_history
+from utils.models import ChatMessage
 
 load_dotenv()
 
@@ -21,7 +22,7 @@ llm = GoogleGenerativeAI(
 )
 
 
-# not dealing with vector store now
+# not dealing with vector store any time soon
 
 # def vector_store():
 #     try:
@@ -60,25 +61,28 @@ llm = GoogleGenerativeAI(
 #         return False
 
 
-def chatbot(message: str, chatbot_id: str) -> str:
+def chatbot(chat: ChatMessage) -> str:
     try:
-        business_description = get_website_description(chatbot_id)
-        if not business_description:
-            return "Sorry, I couldn't find information about this business."
+        website_description = get_website_description(chat.chatbot_id)
+        chatbot_history = get_chatbot_history(chat.chatbot_id)
+        if not website_description:
+            return "Sorry, I couldn't find information about this platform."
 
         prompt_template = PromptTemplate(
-            input_variables=["business_description", "question"],
+            input_variables=["website_description", "question", "chatbot_history"],
             template="""
-            Business Description: {business_description}
+            Website Description: {website_description}
             Customer Question: {question}
+            Previous Messages of customer: {chatbot_history}
             Answer:
             """
         )
 
         chain = LLMChain(llm=llm, prompt=prompt_template)
         response = chain.invoke({
-            "business_description": business_description,
-            "question": message
+            "website_description": website_description,
+            "question": chat.message,
+            "chatbot_history": chatbot_history
         })
 
         return response['text']
@@ -87,6 +91,4 @@ def chatbot(message: str, chatbot_id: str) -> str:
         logger.error(f"Error running chatbot: \n{e}")
         return "I'm sorry, but I encountered an error while processing your request."
 
-
-if __name__ == "__main__":
-    print(chatbot("What is the best way to increase sales?", "We are a company that sells shoes."))
+  

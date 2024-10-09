@@ -77,13 +77,11 @@ def database():
             
                 CREATE TABLE IF NOT EXISTS chatbot_messages (
                     id SERIAL PRIMARY KEY,
-                    user_email VARCHAR(255) NOT NULL,
                     chatbot_id VARCHAR(255) NOT NULL,
                     customer_id VARCHAR(255) NOT NULL,
                     message TEXT NOT NULL,
                     response TEXT NOT NULL,
                     created_at TIMESTAMPTZ DEFAULT NOW(),
-                    FOREIGN KEY (user_email) REFERENCES users(email),
                     FOREIGN KEY (chatbot_id) REFERENCES chatbots(id)
                 
                 """)
@@ -94,7 +92,7 @@ def database():
 
 # CRUD
 
-def new_user(user: CreateUser) -> bool | str:
+def create_user(user: CreateUser) -> bool | str:
     try:
         with get_cursor() as cur:
             cur.execute(
@@ -108,15 +106,14 @@ def new_user(user: CreateUser) -> bool | str:
         return "Some error occurred"
 
 
-
-def new_chatbot(chatbot: CreateChatbot) -> bool | str:
+def create_chatbot(chatbot: CreateChatbot) -> bool | str:
     try:
         with get_cursor() as cur:
             cur.execute(
                 "SELECT * FROM users WHERE email = %s", (chatbot.user_email,)
             )
             if cur.fetchone() is None:
-                return "User not found"
+                return {"success": False, "message": "User not found"}
             chatbot_id = str(uuid.uuid4())
             cur.execute(
                 "INSERT INTO chatbots (id, user_email, website, description, greeting_message, default_response) VALUES (%s, %s, %s, %s, %s, %s)",
@@ -124,26 +121,39 @@ def new_chatbot(chatbot: CreateChatbot) -> bool | str:
                  chatbot.greeting_message, chatbot.default_response)
             )
         logger.info(f"New chatbot {chatbot_id} added successfully.")
-        return {"success": True,  "chatbot_id": chatbot_id}
+        return {"success": True, "chatbot_id": chatbot_id}
     except Exception as e:
         logger.error(f"Error adding new chatbot: {e}")
         return {"success": False, "message": "Some error occurred"}
 
 
-
-def chatbot_messages(message: ChatMessage) -> bool | str:
+def put_chatbot_history(chat: ChatMessage) -> bool | str:
     try:
         with get_cursor() as cur:
             cur.execute(
-                "INSERT INTO chatbot_messages (user_email, chatbot_id, customer_id, message, response) VALUES (%s, %s, %s, %s, %s)",
-                (message.user_email, message.chatbot_id,
-                 message.customer_id, message.message, message.response)
+                "INSERT INTO chatbot_messages (chatbot_id, customer_id, message, response) VALUES (%s, %s, %s, %s)",
+                (chat.chatbot_id, chat.customer_id, chat.message, chat.response)
             )
         logger.info(f"Chatbot message added successfully.")
     except Exception as e:
         logger.error(f"Error retrieving chatbot messages: {e}")
         return "Some error occurred"
 
+
+def get_chatbot_history(chatbot_id: str, customer_id: str) -> list | str:
+    try:
+        with get_cursor() as cur:
+            cur.execute(
+                "SELECT * FROM chatbot_messages WHERE chatbot_id = %s AND customer_id = %s",
+                (chatbot_id, customer_id)
+            )
+            messages = cur.fetchall()
+            if messages:
+                return messages
+        return "No messages history"
+    except Exception as e:
+        logger.error(f"Error retrieving chatbot messages: {e}")
+        return "Some error occurred"
 
 
 def find_user(email: str) -> bool | str:
@@ -158,6 +168,20 @@ def find_user(email: str) -> bool | str:
         logger.error(f"Error retrieving user: {e}")
         return "Some error occurred"
 
+
+def get_website_description(chatbot_id: str) -> str | None:
+    try:
+        with get_cursor() as cur:
+            cur.execute(
+                "SELECT description FROM chatbots WHERE id = %s", (chatbot_id,)
+            )
+            description = cur.fetchone()
+            if description:
+                return description[0]
+        return None
+    except Exception as e:
+        logger.error(f"Error retrieving website description: {e}")
+        return None
 
 
 def get_chatbot(user_email: str) -> dict | str:
@@ -178,4 +202,3 @@ def get_chatbot(user_email: str) -> dict | str:
     except Exception as e:
         logger.error(f"Error retrieving chatbot: {e}")
         return "Some error occurred"
-

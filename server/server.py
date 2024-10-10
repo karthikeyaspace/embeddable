@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from app import chatbot
+# from app import chatbot
 # from db import create_user_db, create_chatbot_db, database, get_chatbot
 from utils.data import website1, website2
 from utils.models import CreateUser, CreateChatbot, ChatMessage
@@ -51,13 +51,14 @@ async def create_chatbot(chatbot: CreateChatbot):
 
     return {"success": False, "message": result.message}
 
+
 class GetWebsiteDetails(BaseModel):
     chatbot_id: str
+
 
 @app.post('/getwebsitedetails')
 async def get_website_details(request: GetWebsiteDetails):
     try:
-        print(request.chatbot_id)
         # chatbot = get_chatbot(chatbot_id)
         return {"success": True, "website": website1}
     except Exception as e:
@@ -65,15 +66,23 @@ async def get_website_details(request: GetWebsiteDetails):
         return {"website": "", "description": ""}
 
 
+class ChatRequest(BaseModel):
+    chatbot_id: str
+    message: str
+
+
 @app.post("/chat")
-async def chat(chat: ChatMessage):
+async def chat(message: ChatRequest):
     try:
         # response = chatbot(chat)
-        return {"response": "Hey i am chatbot"}
+        print(message)
+        return {"success": True, "response": "Hey i am chatbot"}
     except Exception as e:
         logger.error(f"Error chatting: {e}")
-        return {"response": "Some error occurred"}
+        return {"success": False, "response": "Some error occurred"}
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="localhost", port=8000)
+
+    # uvicorn server:app --reload

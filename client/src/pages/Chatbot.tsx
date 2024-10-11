@@ -1,22 +1,34 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 
+interface ChatbotConfig {
+  imageUrl: string;
+  user_name: string;
+  website_name: string;
+  website_url: string;
+  home_message: string;
+  description: string;
+  default_questions: string[];
+  greeting_message: string;
+  error_response: string;
+}
+
 const Chatbot: React.FC = () => {
   const { id: chatbotId } = useParams<{ id: string }>();
   const [messages, setMessages] = useState<
     { content: string; isUser: boolean }[]
   >([]);
   const [input, setInput] = useState("");
-  const [config, setConfig] = useState<{
-    website: string;
-    description: string;
-    default_questions: string[];
-    greeting_message: string;
-  }>({
-    website: "",
+  const [config, setConfig] = useState<ChatbotConfig>({
+    imageUrl: "",
+    user_name: "",
+    website_name: "",
+    website_url: "",
+    home_message: "",
     description: "",
     default_questions: [],
     greeting_message: "",
+    error_response: "",
   });
   const [activeTab, setActiveTab] = useState<"home" | "chat">("home");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -95,14 +107,7 @@ const Chatbot: React.FC = () => {
 
   return (
     <div className="bg-red-100">
-      <div className=" max-w-[400px] h-screen mx-auto flex flex-col overflow-hidden">
-        <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
-          <span className="font-bold">{config?.website}</span>
-          <button className="text-white hover:text-gray-200 transition-colors">
-            &times;
-          </button>
-        </div>
-
+      <div className="w-full sm:w-[400px] min-h-screen mx-auto flex flex-col overflow-hidden">
         <div className="flex bg-gray-100">
           <button
             className={`flex-1 py-2 font-medium transition-colors ${
@@ -150,7 +155,7 @@ const Chatbot: React.FC = () => {
           {activeTab === "home" && config && (
             <div>
               <h3 className="font-bold mb-2 text-lg">Website Name</h3>
-              <p className="mb-4 text-gray-700">{config.website}</p>
+              <p className="mb-4 text-gray-700">{config.website_name}</p>
               <h3 className="font-bold mb-2 text-lg">Default Questions</h3>
               <ul className="space-y-2">
                 {config.default_questions?.map((question, index) => (

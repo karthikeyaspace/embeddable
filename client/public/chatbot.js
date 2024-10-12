@@ -39,6 +39,7 @@
       iframe.style.bottom = "0";
       iframe.style.right = "0";
       iframe.style.borderRadius = "0";
+      bubble.style.bottom = "120px"
     } else if (windowWidth <= 1500) {
       iframe.style.width = "400px";
       iframe.style.height = "550px";

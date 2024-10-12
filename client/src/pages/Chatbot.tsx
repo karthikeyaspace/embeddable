@@ -1,13 +1,23 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  ArrowLeftIcon,
+  ChevronRightSquare,
+  Home,
+  TextIcon,
+} from "lucide-react";
 
 interface ChatbotConfig {
-  imageUrl: string;
+  image_url: string;
+  logo_url: string;
   user_name: string;
   website_name: string;
   website_url: string;
+  chatbot_type: "personal" | "business";
+  contact_link: string;
   home_message: string;
-  description: string;
+  description?: string;
   default_questions: string[];
   greeting_message: string;
   error_response: string;
@@ -20,15 +30,26 @@ const Chatbot: React.FC = () => {
   >([]);
   const [input, setInput] = useState("");
   const [config, setConfig] = useState<ChatbotConfig>({
-    imageUrl: "",
-    user_name: "",
-    website_name: "",
-    website_url: "",
-    home_message: "",
-    description: "",
-    default_questions: [],
-    greeting_message: "",
-    error_response: "",
+    image_url:
+      "https://avatars.githubusercontent.com/u/112397111?s=400&u=45930fe8e389287b7ce146eec80a826bcada8ff3&v=4",
+    logo_url: "https://kv3.vercel.app/logo-white.svg",
+    user_name: "Karthikeya",
+    website_name: "Karthikeya inc.",
+    website_url: "kv3.vercel.app",
+    chatbot_type: "personal",
+    contact_link: "https://linkedin.com/in/karthikeyaveruturi",
+    home_message: "Hi There 👋, \nI'm Karthikeya.",
+    description:
+      "I am a Student and a aspiring Full-stack developer and a Software engineer. Passionate about building web applications and solving real-world problems.",
+    default_questions: [
+      "How can I contact you?",
+      "Can you help me with my project?",
+      "What are your skills?",
+      "What are you currently working on?",
+    ],
+    greeting_message: "Hello, how can I help you today?",
+    error_response:
+      "Could you please contact me at linkedin@karthikeyaveruturi",
   });
   const [activeTab, setActiveTab] = useState<"home" | "chat">("home");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -82,18 +103,13 @@ const Chatbot: React.FC = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      const botResponse = data.success
-        ? data.response
-        : "Sorry, there was an error processing your message.";
+      const botResponse = data.success ? data.response : config.error_response;
       setMessages((prev) => [...prev, { content: botResponse, isUser: false }]);
     } catch (error) {
       console.error("Error sending chat message:", error);
       setMessages((prev) => [
         ...prev,
-        {
-          content: "Sorry, there was an error processing your message.",
-          isUser: false,
-        },
+        { content: config.error_response, isUser: false },
       ]);
     }
   };
@@ -106,89 +122,180 @@ const Chatbot: React.FC = () => {
   };
 
   return (
-    <div className="bg-red-100">
-      <div className="w-full sm:w-[400px] min-h-screen mx-auto flex flex-col overflow-hidden">
-        <div className="flex bg-gray-100">
-          <button
-            className={`flex-1 py-2 font-medium transition-colors ${
-              activeTab === "home"
-                ? "bg-white border-b-2 border-blue-600 text-blue-600"
-                : "text-gray-600 hover:bg-gray-200"
-            }`}
-            onClick={() => setActiveTab("home")}
-          >
-            Home
-          </button>
-          <button
-            className={`flex-1 py-2 font-medium transition-colors ${
-              activeTab === "chat"
-                ? "bg-white border-b-2 border-blue-600 text-blue-600"
-                : "text-gray-600 hover:bg-gray-200"
-            }`}
-            onClick={() => setActiveTab("chat")}
-          >
-            Chat
-          </button>
-        </div>
-        <div className="flex-grow overflow-auto p-4 bg-gray-50">
-          {activeTab === "chat" && (
-            <div>
-              {messages.map((msg, index) => (
-                <div
-                  key={index}
-                  className={`mb-2 ${msg.isUser ? "text-right" : "text-left"}`}
-                >
-                  <span
-                    className={`inline-block p-2 rounded-lg max-w-[80%] ${
-                      msg.isUser
-                        ? "bg-blue-600 text-white"
-                        : "bg-white text-gray-800 border border-gray-300"
-                    }`}
-                  >
-                    {msg.content}
-                  </span>
+    <div className="bg-gray-200">
+      <div className="w-full sm:w-[400px] h-screen mx-auto bg-white flex flex-col">
+        <div className="flex-grow overflow-hidden">
+          <AnimatePresence mode="wait">
+            {activeTab === "home" && (
+              <motion.div
+                key="home"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col min-h-[calc(100vh-2rem)] justify-between"
+              >
+                <div>
+                  <div className="w-full p-8 bg-[#0057ff]">
+                    <div className="flex justify-between items-center">
+                      <img
+                        src={config.logo_url}
+                        alt="Logo"
+                        className="w-10 h-10"
+                      />
+                      <img
+                        src={config.image_url}
+                        alt="User"
+                        className="w-10 h-10 rounded-full"
+                      />
+                    </div>
+                    <div className="flex-grow mt-10 space-y-5">
+                      <h2 className="text-3xl font-bold mb-4">
+                        {config.home_message}
+                      </h2>
+                      <p className="text-white">{config?.description}</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-b from-[#0057ff] to-white p-4 space-y-6  cursor-pointer">
+                    <span
+                      className="w-full p-4 border border-gray-400 rounded-lg shadow-lg bg-white flex justify-between"
+                      onClick={() => setActiveTab("chat")}
+                    >
+                      <span>
+                        <p className="font-bold leading-none">Chat with me</p>
+                        <p className="text-sm">talk to AI version of me</p>
+                      </span>
+                      <ChevronRightSquare size={24} color="#0057ff" />
+                    </span>
+                    <span
+                      className="w-full p-4 border border-gray-400 rounded-lg shadow-lg bg-white flex justify-between"
+                      onClick={() => window.open(config.contact_link, "_blank")}
+                    >
+                      <span>
+                        <p className="font-bold leading-none">Contact me</p>
+                        <p className="text-sm">connect with me on my social</p>
+                      </span>
+                      <ChevronRightSquare size={24} color="#0057ff" />
+                    </span>
+                  </div>
                 </div>
-              ))}
-              <div ref={messagesEndRef} />
-            </div>
-          )}
-          {activeTab === "home" && config && (
-            <div>
-              <h3 className="font-bold mb-2 text-lg">Website Name</h3>
-              <p className="mb-4 text-gray-700">{config.website_name}</p>
-              <h3 className="font-bold mb-2 text-lg">Default Questions</h3>
-              <ul className="space-y-2">
-                {config.default_questions?.map((question, index) => (
-                  <li
-                    key={index}
-                    className="cursor-pointer text-blue-600 hover:underline transition-colors"
-                    onClick={() => {
-                      setActiveTab("chat");
-                      sendChatMessage(question);
-                    }}
+
+                <div className="flex w-full h-20 shadow-[0px_-5px_15px_-5px_rgba(0,0,0,0.1)]">
+                  <button
+                    className={`flex-1 py-3 font-medium transition-colors flex flex-col justify-center items-center`}
+                    onClick={() => setActiveTab("home")}
                   >
-                    {question}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+                    <p className="font-bold text-[#0057ff]">
+                      <Home size={24} color="#0057ff" className="mx-auto" />{" "}
+                      Home
+                    </p>
+                  </button>
+                  <button
+                    className={`flex-1 py-3 font-medium transition-colors flex flex-col justify-center items-center`}
+                    onClick={() => setActiveTab("chat")}
+                  >
+                    <p className="hover:text-[#0057ff]">
+                      <TextIcon size={24} className="mx-auto" />
+                      Chat
+                    </p>
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === "chat" && (
+              <motion.div
+                key="chat"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.2 }}
+                className="flex flex-col h-full"
+              >
+                <div className="w-full h-16 p-4 bg-[#0057ff] flex justify-between items-center">
+                  <ArrowLeftIcon
+                    color="white"
+                    onClick={() => setActiveTab("home")}
+                    className="cursor-pointer"
+                  />
+                  <p className="font-bold text-white text-lg">
+                    {config.user_name}
+                  </p>
+                  <span></span>
+                </div>
+                <div className="flex-grow overflow-y-auto p-4 small-scrollbar">
+                  <img
+                    src={config.image_url}
+                    className="w-24 h-24 mx-auto rounded-full my-6"
+                    alt=""
+                  />
+                  <p className="my-4 inline-block p-2 rounded-lg max-w-[80%] bg-blue-100 text-gray-800">
+                    {config.greeting_message}
+                  </p>
+                  {messages.length === 0 && (
+                    <div className="mb-4">
+                      <div className="grid grid-cols-2 gap-3">
+                        {config.default_questions?.map((question, index) => (
+                          <button
+                            key={index}
+                            className="cursor-pointer bg-blue-50 text-blue-600 p-3 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium shadow-sm border border-blue-100 flex items-center justify-center text-center h-full"
+                            onClick={() => sendChatMessage(question)}
+                          >
+                            {question}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div className="space-y-4">
+                    {messages.map((msg, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: index * 0.1 }}
+                        className={`flex ${
+                          msg.isUser ? "justify-end" : "justify-start"
+                        }`}
+                      >
+                        <span
+                          className={`inline-block p-2 rounded-lg max-w-[80%] ${
+                            msg.isUser
+                              ? "bg-blue-600 text-white"
+                              : "bg-blue-100 text-gray-800"
+                          }`}
+                        >
+                          {msg.content}
+                        </span>
+                      </motion.div>
+                    ))}
+                  </div>
+                  <div ref={messagesEndRef} />
+                </div>
+                <form onSubmit={handleSubmit} className="p-4 bg-white flex">
+                  <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    className="flex-grow px-3 py-2 rounded-l-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    placeholder="Type a message..."
+                  />
+                  <button
+                    type="submit"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-r-full hover:bg-blue-700 transition-colors"
+                  >
+                    Send
+                  </button>
+                </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-        <form onSubmit={handleSubmit} className="p-4 bg-gray-100 flex">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            className="flex-grow px-3 py-2 rounded-l-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600"
-            placeholder="Type a message..."
-          />
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded-r-full hover:bg-blue-700 transition-colors"
-          >
-            Send
-          </button>
-        </form>
+
+        <div className="h-8 text-sm text-gray-500 flex justify-center items-center bg-gray-50">
+          powered by embeddable
+        </div>
       </div>
     </div>
   );

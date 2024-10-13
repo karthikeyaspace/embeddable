@@ -3,12 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # from app import chatbot
 # from db import create_user_db, create_chatbot_db, database, get_chatbot
-from utils.data import website1, website2
-from utils.models import CreateUser, CreateChatbot, ChatMessage
+from utils.models import CreateUser, CreateChatbot
 import logging
 from pydantic import BaseModel
 
 app = FastAPI()
+
+
 
 app.add_middleware(
     CORSMiddleware,

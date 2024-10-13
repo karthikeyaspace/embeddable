@@ -15,3 +15,4 @@ export interface ChatbotConfig {
     ai_response: string; // what should the AI respond with?
   }[];
 }
+

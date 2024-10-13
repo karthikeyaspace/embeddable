@@ -4,7 +4,7 @@ from langchain.prompts import PromptTemplate
 from langchain.chains.llm import LLMChain
 from dotenv import load_dotenv
 import logging
-from db import get_website_description, get_chatbot_history
+from server.db_postgres import get_website_description, get_chatbot_history
 from utils.models import ChatMessage
 
 load_dotenv()
@@ -20,6 +20,37 @@ llm = GoogleGenerativeAI(
     temperature=0.5,
     max_tokens=100,
 )
+
+
+def chatbot(chat: ChatMessage) -> str:
+    try:
+        website_description = get_website_description(chat.chatbot_id)
+        chatbot_history = get_chatbot_history(chat.chatbot_id)
+        if not website_description:
+            return "Sorry, I couldn't find information about this platform."
+
+        prompt_template = PromptTemplate(
+            input_variables=["website_description", "question", "chatbot_history"],
+            template="""
+            Website Description: {website_description}
+            Customer Question: {question}
+            Previous Messages of customer: {chatbot_history}
+            Answer:
+            """
+        )
+
+        chain = LLMChain(llm=llm, prompt=prompt_template)
+        response = chain.invoke({
+            "website_description": website_description,
+            "question": chat.message,
+            "chatbot_history": chatbot_history
+        })
+
+        return response['text']
+
+    except Exception as e:
+        logger.error(f"Error running chatbot: \n{e}")
+        return "I'm sorry, but I encountered an error while processing your request."
 
 
 # not dealing with vector store any time soon
@@ -61,34 +92,5 @@ llm = GoogleGenerativeAI(
 #         return False
 
 
-def chatbot(chat: ChatMessage) -> str:
-    try:
-        website_description = get_website_description(chat.chatbot_id)
-        chatbot_history = get_chatbot_history(chat.chatbot_id)
-        if not website_description:
-            return "Sorry, I couldn't find information about this platform."
-
-        prompt_template = PromptTemplate(
-            input_variables=["website_description", "question", "chatbot_history"],
-            template="""
-            Website Description: {website_description}
-            Customer Question: {question}
-            Previous Messages of customer: {chatbot_history}
-            Answer:
-            """
-        )
-
-        chain = LLMChain(llm=llm, prompt=prompt_template)
-        response = chain.invoke({
-            "website_description": website_description,
-            "question": chat.message,
-            "chatbot_history": chatbot_history
-        })
-
-        return response['text']
-
-    except Exception as e:
-        logger.error(f"Error running chatbot: \n{e}")
-        return "I'm sorry, but I encountered an error while processing your request."
 
   

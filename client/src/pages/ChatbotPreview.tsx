@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { ChatbotConfig } from "../utils/types";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowLeftIcon,
@@ -7,106 +7,19 @@ import {
   Home,
   TextIcon,
 } from "lucide-react";
-import { ChatbotConfig } from "../utils/types";
 
-const Chatbot: React.FC = () => {
-  const { id: chatbotId } = useParams<{ id: string }>();
+const ChatbotPreview: React.FC<{ config: ChatbotConfig }> = ({ config }) => {
   const [messages, setMessages] = useState<
     { content: string; isUser: boolean }[]
   >([]);
-  const [input, setInput] = useState("");
-  const [config, setConfig] = useState<ChatbotConfig>({
-    image_url:
-      "https://avatars.githubusercontent.com/u/112397111?s=400&u=45930fe8e389287b7ce146eec80a826bcada8ff3&v=4",
-    logo_url: "https://kv3.vercel.app/logo-white.svg",
-    user_name: "Karthikeya",
-    website_url: "kv3.vercel.app",
-    chatbot_type: "personal",
-
-    contact_link: "https://linkedin.com/in/karthikeyaveruturi",
-    home_message: "Hi There 👋, \nI'm Karthikeya.",
-    description:
-      "I am a Student and a aspiring Full-stack developer and a Software engineer. Passionate about building web applications and solving real-world problems.",
-
-    greeting_message: "Hello, how can I help you today?",
-    default_questions: [
-      "How can I contact you?",
-      "Can you help me with my project?",
-      "What are your skills?",
-      "What are you currently working on?",
-    ],
-    error_response:
-      "Could you please contact me at linkedin@karthikeyaveruturi",
-  });
   const [activeTab, setActiveTab] = useState<"home" | "chat">("home");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    fetchChatbotConfig();
-  }, [chatbotId]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
-
-  const fetchChatbotConfig = async () => {
-    try {
-      const response = await fetch(`http://localhost:8000/getwebsitedetails`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ chatbot_id: chatbotId }),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      setConfig(data.website);
-      setMessages([{ content: data.website.greeting_message, isUser: false }]);
-    } catch (error) {
-      console.error("Error fetching chatbot config:", error);
-    }
-  };
-
-  const sendChatMessage = async (message: string) => {
-    try {
-      setMessages((prev) => [...prev, { content: message, isUser: true }]);
-      setInput("");
-
-      const response = await fetch("http://localhost:8000/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          chatbot_id: chatbotId,
-          message: message,
-        }),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      const botResponse = data.success ? data.response : config.error_response;
-      setMessages((prev) => [...prev, { content: botResponse, isUser: false }]);
-    } catch (error) {
-      console.error("Error sending chat message:", error);
-      setMessages((prev) => [
-        ...prev,
-        { content: config.error_response, isUser: false },
-      ]);
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (input.trim()) {
-      sendChatMessage(input.trim());
-    }
-  };
 
   return (
     <div className="bg-gray-200">
@@ -125,16 +38,24 @@ const Chatbot: React.FC = () => {
                 <div>
                   <div className="w-full p-8 bg-[#0057ff]">
                     <div className="flex justify-between items-center">
-                      <img
-                        src={config.logo_url}
-                        alt="Logo"
-                        className="w-10 h-10"
-                      />
-                      <img
-                        src={config.image_url}
-                        alt="User"
-                        className="w-10 h-10 rounded-full"
-                      />
+                      {config.logo_url ? (
+                        <img
+                          src={config.logo_url}
+                          alt="Logo"
+                          className="w-10 h-10"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 bg-white"></div>
+                      )}
+                      {config.image_url ? (
+                        <img
+                          src={config.image_url}
+                          alt="User"
+                          className="w-10 h-10 rounded-full"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 bg-white rounded-full"></div>
+                      )}
                     </div>
                     <div className="flex-grow mt-10 space-y-5">
                       <h2 className="text-3xl font-bold mb-4">
@@ -227,7 +148,15 @@ const Chatbot: React.FC = () => {
                           <button
                             key={index}
                             className="cursor-pointer bg-blue-50 text-blue-600 p-3 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium shadow-sm border border-blue-100 flex items-center justify-center text-center h-full"
-                            onClick={() => sendChatMessage(question)}
+                            onClick={() =>
+                              setMessages((prev) => [
+                                ...prev,
+                                {
+                                  content: config.error_response,
+                                  isUser: false,
+                                },
+                              ])
+                            }
                           >
                             {question}
                           </button>
@@ -260,16 +189,15 @@ const Chatbot: React.FC = () => {
                   </div>
                   <div ref={messagesEndRef} />
                 </div>
-                <form onSubmit={handleSubmit} className="p-4 bg-white flex">
+                <form className="p-4 bg-white flex">
                   <input
                     type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
                     className="flex-grow px-3 py-2 rounded-l-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600"
                     placeholder="Type a message..."
+                    disabled
                   />
                   <button
-                    type="submit"
+                    disabled
                     className="bg-blue-600 text-white px-4 py-2 rounded-r-full hover:bg-blue-700 transition-colors"
                   >
                     Send
@@ -288,4 +216,4 @@ const Chatbot: React.FC = () => {
   );
 };
 
-export default Chatbot;
+export default ChatbotPreview;

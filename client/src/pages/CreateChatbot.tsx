@@ -186,6 +186,7 @@ const CreateChatbot: React.FC = () => {
                         ai_configuration: newConfig,
                       }));
                     }}
+                    required
                     className="w-full px-3 py-2 text-gray-700 border rounded-lg"
                   />
                 </div>
@@ -204,6 +205,7 @@ const CreateChatbot: React.FC = () => {
                         ai_configuration: newConfig,
                       }));
                     }}
+                    required
                     className="w-full px-3 py-2 text-gray-700 border rounded-lg"
                     rows={3}
                   />

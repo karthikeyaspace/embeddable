@@ -41,9 +41,9 @@ const Chatbot: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"home" | "chat">("home");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    fetchChatbotConfig();
-  }, [chatbotId]);
+  // useEffect(() => {
+  //   fetchChatbotConfig();
+  // }, [chatbotId]);
 
   useEffect(() => {
     if (messagesEndRef.current) {

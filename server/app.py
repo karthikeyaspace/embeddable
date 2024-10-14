@@ -4,8 +4,9 @@ from langchain.prompts import PromptTemplate
 from langchain.chains.llm import LLMChain
 from dotenv import load_dotenv
 import logging
-from server.db_postgres import get_website_description, get_chatbot_history
-from utils.models import ChatMessage
+
+from utils.models import ServerChatMessageRequest
+from db_firestore import retrieve_chatbot
 
 load_dotenv()
 
@@ -22,28 +23,42 @@ llm = GoogleGenerativeAI(
 )
 
 
-def chatbot(chat: ChatMessage) -> str:
+def chatbot(chat: ServerChatMessageRequest) -> str:
     try:
-        website_description = get_website_description(chat.chatbot_id)
-        chatbot_history = get_chatbot_history(chat.chatbot_id)
-        if not website_description:
-            return "Sorry, I couldn't find information about this platform."
+        chatbot = retrieve_chatbot(chat.chatbot_id)
+        if chatbot is None:
+            return {"success": False, "message": "Chatbot not found"}
+
+        description = chatbot["description"]
+        prev_messages = chat.prev_messages
+        ai_configuration = chatbot["ai_configuration"]  # list[dict[str, str]]
+        user_message = chat.user_message
+
+        chatbot_history = "\n".join(prev_messages) if prev_messages else ""
+        ai_config_string = ""
+
+        for key, value in ai_configuration:
+            text = "If users ask about " + key + " , then repond with " + value + "\n"
+            ai_config_string += text
 
         prompt_template = PromptTemplate(
-            input_variables=["website_description", "question", "chatbot_history"],
-            template="""
-            Website Description: {website_description}
-            Customer Question: {question}
-            Previous Messages of customer: {chatbot_history}
+            input_variables=["website_description", "user_message",
+                             "previous_user_messages", "ai_configuration"],
+            template=""" You are a customer service representative for a business. You are chatting with a customer who is asking a question about the business. You need to provide an answer to the customer's question.
+            For your context, Here is the business description: {website_description}, 
+            Previous Messages of customer: {previous_user_messages},
+            Here is how you shall respond: {ai_configuration}
+            Here is the customer's question you need to respond to: {user_message}
             Answer:
             """
         )
 
         chain = LLMChain(llm=llm, prompt=prompt_template)
         response = chain.invoke({
-            "website_description": website_description,
-            "question": chat.message,
-            "chatbot_history": chatbot_history
+            "website_description": description,
+            "user_message": user_message,
+            "previous_user_messages": chatbot_history,
+            "ai_configuration": ai_config_string
         })
 
         return response['text']
@@ -68,7 +83,6 @@ def chatbot(chat: ChatMessage) -> str:
 #         return None
 
 
-
 # def add_to_vector_store(description: str):
 #     try:
 #         store = vector_store()
@@ -90,7 +104,3 @@ def chatbot(chat: ChatMessage) -> str:
 #     except Exception as e:
 #         logger.error(f"Error updating vector store: \n{e}")
 #         return False
-
-
-
-  

@@ -6,6 +6,21 @@ class CreateUser(BaseModel):
     email: str
     password: str
     role: str = "user"
+    
+
+class ServerChatMessageRequest(BaseModel):
+    chatbot_id: str
+    user_message: str
+    prev_messages: list[str] | None
+    
+
+class ChatMessage(BaseModel):
+    chatbot_id: str
+    # customer_id: str - temporary customerid for analytics
+    description: str
+    website_url: str
+    ai_configuration: list[dict[str, str]] | None
+    
 
 
 class CreateChatbot(BaseModel):

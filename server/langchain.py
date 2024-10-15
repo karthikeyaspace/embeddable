@@ -5,8 +5,8 @@ from langchain.chains.llm import LLMChain
 from dotenv import load_dotenv
 import logging
 
-from utils.models import ServerChatMessageRequest
-from db_firestore import retrieve_chatbot
+from utils.models import ChatbotModels
+from db import get_chatbot_db
 
 load_dotenv()
 
@@ -23,9 +23,9 @@ llm = GoogleGenerativeAI(
 )
 
 
-def chatbot(chat: ServerChatMessageRequest) -> str:
+def chatbot(chat: ChatbotModels.ChatRequest) -> str:
     try:
-        chatbot = retrieve_chatbot(chat.chatbot_id)
+        chatbot = get_chatbot_db(chat.chatbot_id)
         if chatbot is None:
             return {"success": False, "message": "Chatbot not found"}
 

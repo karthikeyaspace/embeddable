@@ -3,7 +3,7 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 
 import logging
-from utils.models import CreateUser, CreateChatbot
+from utils.models import UserModels, ChatbotModels
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -14,49 +14,35 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 
-def create_user(user: CreateUser):
+# user
+
+def get_user_db(user_id: str) -> dict | None:
     try:
-        users = db.collection("embeddable.users").document()
-        user_dict = user.model_dump()
-        users.set(user_dict)
+        user = db.collection("embeddable.users").document(user_id).get()
+        return user.to_dict() if user.exists else None
+    except Exception as e:
+        logger.error(f"Error retrieving user: {e}")
+        return None
+
+
+def create_user_db(email: str, password: str, user_id: str, role: str) -> bool:
+    try:
+        db.collection("embeddable.users").document(user_id).set({
+            "email": email,
+            "password": password,
+            "role": role,
+            "chatbots": [],
+            "created_at": firestore.SERVER_TIMESTAMP
+        })
         return True
     except Exception as e:
         logger.error(f"Error creating user: {e}")
         return False
 
 
-def retrieve_user(email: str):
-    try:
-        user = db.collection("embeddable.users").where(
-            "email", "==", email).stream()
-        for u in user:
-            return u.to_dict()
-        return []
-    except Exception as e:
-        logger.error(f"Error retrieving user: {e}")
-        return []
+# chatbot
 
-
-def generate_chatbot_id(n):
-    import random
-    import string
-    return ''.join(random.choices(string.ascii_lowercase, k=n))
-
-
-def create_chatbot(chatbot: CreateChatbot):
-    try:
-        chatbot_id = generate_chatbot_id(10)
-        chatbot.chatbot_id = chatbot_id
-        chatbots = db.collection("embeddable.chatbots").document()
-        chatbot_dict = chatbot.model_dump()
-        chatbots.set(chatbot_dict)
-        return chatbot_id
-    except Exception as e:
-        logger.error(f"Error creating chatbot: {e}")
-        return False
-
-
-def retrieve_chatbot(chatbot_id: str):
+def get_chatbot_db(chatbot_id: str):
     try:
         chatbot = db.collection(
             "embeddable.chatbots").document(chatbot_id).get()
@@ -66,39 +52,46 @@ def retrieve_chatbot(chatbot_id: str):
         return None
 
 
-def retrieve_users_chatbots(user_email: str):
+def generate_chatbot_id(n: int) -> str:
+    import random
+    import string
+    return ''.join(random.choices(string.ascii_lowercase, k=n))
+
+
+def create_chatbot_db(chatbot: ChatbotModels.CreateChatbot)-> str | bool:
     try:
-        
+        chatbot_id = generate_chatbot_id(8)
+        chatbot.chatbot_id = chatbot_id
+        chatbots = db.collection("embeddable.chatbots").document("chatbot_id")
+        chatbot_dict = chatbot.model_dump()
+        chatbots.set(chatbot_dict)
+        return chatbot_id
+    except Exception as e:
+        logger.error(f"Error creating chatbot: {e}")
+        return False
+
+
+def get_users_chatbots_db(user_id: str) -> list[dict] | None:
+    try:
         chatbots = db.collection("embeddable.chatbots").where(
-            "user_email", "==", user_email).stream()
-        chatbot_list = []
+            "user_id", "==", user_id).stream()
+        chatbots_list = []
         for chatbot in chatbots:
-            chatbot_list.append(chatbot.to_dict())
-        return chatbot_list if chatbot_list else None
+            chatbots_list.append(chatbot.to_dict())
+        return chatbots_list
     except Exception as e:
         logger.error(f"Error retrieving chatbots: {e}")
         return None
 
 
-def edit_chatbot(chatbot: CreateChatbot):
+def edit_chatbot_db(chatbot: ChatbotModels.CreateChatbot) -> bool:
     try:
         chatbot_id = chatbot.chatbot_id
-        chatbot_ref = db.collection("embeddable.chatbots").document(chatbot_id)
         chatbot_dict = chatbot.model_dump()
-        chatbot_ref.update(chatbot_dict)
+        db.collection("embeddable.chatbots").document(chatbot_id).update(chatbot_dict)
         return True
     except Exception as e:
         logger.error(f"Error editing chatbot: {e}")
-        return False
-
-
-def delete_chatbot(chatbot_id: str):
-    try:
-        chatbot_ref = db.collection("embeddable.chatbots").document(chatbot_id)
-        chatbot_ref.delete()
-        return True
-    except Exception as e:
-        logger.error(f"Error deleting chatbot: {e}")
         return False
 
 

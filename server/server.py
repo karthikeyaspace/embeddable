@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 # from app import chatbot
-from db_firestore import create_user as create_user_db, create_chatbot as create_chatbot_db, retrieve_chatbot, retrieve_user, retrieve_users_chatbots
+from db import create_user as create_user_db, create_chatbot as create_chatbot_db, retrieve_chatbot, retrieve_user, retrieve_users_chatbots
 from utils.models import CreateUser, CreateChatbot, ServerChatMessageRequest
 import logging
 from pydantic import BaseModel

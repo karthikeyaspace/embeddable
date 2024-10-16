@@ -1,10 +1,10 @@
 from db import (
-    create_user_db, get_user_db, delete_chatbot_db, get_chatbot_db,
+    create_user_db, get_user_db, get_chatbot_db,
     edit_chatbot_db, create_chatbot_db, get_users_chatbots_db
 )
 from utils.models import UserModels, ChatbotModels
 from uuid import uuid4
-from langchain import chatbot
+from ai import chatbot
 
 
 class UserController:
@@ -47,11 +47,7 @@ class ChatbotController:
         if chatbot:
             return {"success": True, "chatbot": chatbot}
 
-    @staticmethod
-    async def delete_chatbot(user_email: str, chatbot_name: str):
-        result = delete_chatbot_db(user_email, chatbot_name)
-        return {"success": result, "message": "Chatbot deleted successfully" if result else "Some error occurred"}
-
+    
     @staticmethod
     async def edit_chatbot(chatbot: ChatbotModels.CreateChatbot):
         result = edit_chatbot_db(chatbot)
@@ -59,5 +55,5 @@ class ChatbotController:
 
     @staticmethod
     async def chatai(chat: ChatbotModels.ChatRequest):
-        response = chatbot(chat)
+        response = await chatbot(chat)
         return {"success": True, "response": response}

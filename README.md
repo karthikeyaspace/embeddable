@@ -19,6 +19,7 @@
 <!--
 - centralize .env
 - do if else for all the api calls
+- perform validation in frontend and backend 
 - after finishing - optimize the code - reduce db calls etc
 - try storing prev messages, ai config, description in localstorage
 -->

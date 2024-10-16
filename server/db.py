@@ -28,6 +28,7 @@ def get_user_db(user_id: str) -> dict | None:
 def create_user_db(email: str, password: str, user_id: str, role: str) -> bool:
     try:
         db.collection("embeddable.users").document(user_id).set({
+            "user_id": user_id,
             "email": email,
             "password": password,
             "role": role,
@@ -61,9 +62,9 @@ def generate_chatbot_id(n: int) -> str:
 def create_chatbot_db(chatbot: ChatbotModels.CreateChatbot) -> str | bool:
     try:
         chatbot_id = generate_chatbot_id(8)
-        chatbot.chatbot_id = chatbot_id
-        chatbots = db.collection("embeddable.chatbots").document("chatbot_id")
+        chatbots = db.collection("embeddable.chatbots").document(chatbot_id)
         chatbot_dict = chatbot.model_dump()
+        chatbot_dict["chatbot_id"] = chatbot_id
         chatbots.set(chatbot_dict)
         return chatbot_id
     except Exception as e:

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from server.controller import UserController, ChatbotController
+from controller import UserController, ChatbotController
 from utils.models import UserModels, ChatbotModels
 from utils.config import env
 import logging
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 @app.get("/")
 async def root():
-    return {"message": "Embeddable AI"}
+    return "Embeddable AI"
 
 
 @app.post("/user/get")
@@ -62,7 +62,7 @@ async def get_chatbot_details(request: ChatbotModels.GetChatbotDetailsRequest):
 
 @app.post("/chat")
 async def chat(request: ChatbotModels.ChatRequest):
-    return await ChatbotController.chatai(request)
+    return await ChatbotController.chatai(chat=request)
 
 
 if __name__ == "__main__":

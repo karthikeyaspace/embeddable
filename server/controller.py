@@ -55,5 +55,5 @@ class ChatbotController:
 
     @staticmethod
     async def chatai(chat: ChatbotModels.ChatRequest):
-        response = await chatbot(chat)
+        response = chatbot(chat)
         return {"success": True, "response": response}

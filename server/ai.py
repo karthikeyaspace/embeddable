@@ -22,38 +22,35 @@ llm = GoogleGenerativeAI(
 
 def chatbot(chat: ChatbotModels.ChatRequest) -> str:
     try:
-        logger.info(f"Chat: {chat}")
-        # chatbot = get_chatbot_db(chat.chatbot_id)
-        # if chatbot is None:
-        #     return {"success": False, "message": "Chatbot not found"}
+        chatbot = get_chatbot_db(chat.chatbot_id)
+        if chatbot is None:
+            return {"success": False, "message": "Chatbot not found"}
 
-        # description = chatbot["description"]
-        # prev_messages = chat.prev_messages
-        # ai_configuration = chatbot["ai_configuration"]
-        # user_message = chat.user_message
+        description = chatbot["description"]
+        prev_messages = chat.prev_messages
+        ai_configuration = chatbot["ai_configuration"]
+        user_message = chat.user_message
 
-        # chatbot_history = "\n".join(prev_messages) if prev_messages else ""
-        # ai_config_string = ""
+        chatbot_history = "\n".join(prev_messages) if prev_messages else ""
+        ai_config_string = ""
 
-        # for key, value in ai_configuration:
-        #     text = "If users ask about " + key + " , then repond with " + value + "\n"
-        #     ai_config_string += text
+        for key, value in ai_configuration:
+            text = "If users ask about " + key + " , then repond with " + value + "\n"
+            ai_config_string += text
 
-        # prompt_template = PromptTemplate(
-        #     input_variables=["website_description", "user_message",
-        #                      "previous_user_messages", "ai_configuration"],
-        #     template=""" You are a customer service representative for a business. 
-        #     You are chatting with a customer who is asking a question about the business. 
-        #     +6You need to provide an answer to the customer's question.
-        #     For your context, Here is the business description: {website_description}, 
-        #     Previous Messages of customer: {previous_user_messages},
-        #     Here is how you shall respond: {ai_configuration}
-        #     Here is the customer's question you need to respond to: {user_message}
-        #     Answer:
-        #     """
-        # )
-        
-        # logger.info(f"Prompt: {prompt_template}")
+        prompt_template = PromptTemplate(
+            input_variables=["website_description", "user_message",
+                             "previous_user_messages", "ai_configuration"],
+            template=""" You are a customer service representative for a business. 
+            You are chatting with a customer who is asking a question about the business. 
+            +6You need to provide an answer to the customer's question.
+            For your context, Here is the business description: {website_description}, 
+            Previous Messages of customer: {previous_user_messages},
+            Here is how you shall respond: {ai_configuration}
+            Here is the customer's question you need to respond to: {user_message}
+            Answer:
+            """
+        )
 
         # chain = LLMChain(llm=llm, prompt=prompt_template)
         # response = chain.invoke({
@@ -62,10 +59,11 @@ def chatbot(chat: ChatbotModels.ChatRequest) -> str:
         #     "previous_user_messages": chatbot_history,
         #     "ai_configuration": ai_config_string
         # })
-
-        # return response['text']
         
-        return "ahihi"
+        
+
+        return "hai"
+        
 
     except Exception as e:
         logger.error(f"Error running chatbot: \n{e}")

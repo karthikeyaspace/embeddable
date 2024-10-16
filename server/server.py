@@ -62,7 +62,7 @@ async def get_chatbot_details(request: ChatbotModels.GetChatbotDetailsRequest):
 
 @app.post("/chat")
 async def chat(request: ChatbotModels.ChatRequest):
-    return await ChatbotController.chatai(chat=request)
+    return await ChatbotController.chatai(request)
 
 
 if __name__ == "__main__":

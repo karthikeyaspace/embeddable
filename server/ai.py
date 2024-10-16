@@ -31,13 +31,17 @@ def chatbot(chat: ChatbotModels.ChatRequest) -> str:
         ai_configuration = chatbot["ai_configuration"]
         user_message = chat.user_message
 
-        chatbot_history = "\n".join(prev_messages) if prev_messages else ""
+        chatbot_history = "\n".join(
+            prev_messages) if prev_messages else "No previous messages"
         ai_config_string = ""
 
-        for key, value in ai_configuration:
-            text = "If users ask about " + key + " , then repond with " + value + "\n"
+        for config in ai_configuration:
+            text = "If users ask about " + \
+                config['user_question'] + " , then repond with " + \
+                config['ai_response'] + "\n"
             ai_config_string += text
-
+            
+        
         prompt_template = PromptTemplate(
             input_variables=["website_description", "user_message",
                              "previous_user_messages", "ai_configuration"],
@@ -52,18 +56,16 @@ def chatbot(chat: ChatbotModels.ChatRequest) -> str:
             """
         )
 
-        # chain = LLMChain(llm=llm, prompt=prompt_template)
-        # response = chain.invoke({
-        #     "website_description": description,
-        #     "user_message": user_message,
-        #     "previous_user_messages": chatbot_history,
-        #     "ai_configuration": ai_config_string
-        # })
-        
-        
+        chain = LLMChain(llm=llm, prompt=prompt_template)
+        response = chain.invoke({   
+            "website_description": description,
+            "user_message": user_message,
+            "previous_user_messages": chatbot_history,
+            "ai_configuration": ai_config_string
+        })
 
-        return "hai"
-        
+        return response['text']
+
 
     except Exception as e:
         logger.error(f"Error running chatbot: \n{e}")

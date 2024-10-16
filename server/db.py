@@ -3,7 +3,7 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 
 import logging
-from utils.models import UserModels, ChatbotModels
+from utils.models import ChatbotModels
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -58,7 +58,7 @@ def generate_chatbot_id(n: int) -> str:
     return ''.join(random.choices(string.ascii_lowercase, k=n))
 
 
-def create_chatbot_db(chatbot: ChatbotModels.CreateChatbot)-> str | bool:
+def create_chatbot_db(chatbot: ChatbotModels.CreateChatbot) -> str | bool:
     try:
         chatbot_id = generate_chatbot_id(8)
         chatbot.chatbot_id = chatbot_id
@@ -88,7 +88,8 @@ def edit_chatbot_db(chatbot: ChatbotModels.CreateChatbot) -> bool:
     try:
         chatbot_id = chatbot.chatbot_id
         chatbot_dict = chatbot.model_dump()
-        db.collection("embeddable.chatbots").document(chatbot_id).update(chatbot_dict)
+        db.collection("embeddable.chatbots").document(
+            chatbot_id).update(chatbot_dict)
         return True
     except Exception as e:
         logger.error(f"Error editing chatbot: {e}")

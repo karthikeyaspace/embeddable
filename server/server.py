@@ -1,18 +1,15 @@
-import os
-from dotenv import load_dotenv
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from server.controller import UserController, ChatbotController
 from utils.models import UserModels, ChatbotModels
+from utils.config import env
 import logging
 
 app = FastAPI()
-load_dotenv()
 
 CORS_ORIGINS = [
-    os.getenv("CORS_ORIGIN"),
+    env["CORS_ORIGIN"],
 ]
 
 app.add_middleware(

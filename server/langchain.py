@@ -1,23 +1,20 @@
-import os
 from langchain_google_genai import GoogleGenerativeAI
 from langchain.prompts import PromptTemplate
 from langchain.chains.llm import LLMChain
-from dotenv import load_dotenv
 import logging
 
 from utils.models import ChatbotModels
 from db import get_chatbot_db
+from server.utils.config import env
 
-load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 llm = GoogleGenerativeAI(
     model="gemini-1.5-flash",
-    api_key=GOOGLE_API_KEY,
+    api_key=env["GOOGLE_API_KEY"],
     temperature=0.5,
     max_tokens=100,
 )
@@ -31,7 +28,7 @@ def chatbot(chat: ChatbotModels.ChatRequest) -> str:
 
         description = chatbot["description"]
         prev_messages = chat.prev_messages
-        ai_configuration = chatbot["ai_configuration"]  # list[dict[str, str]]
+        ai_configuration = chatbot["ai_configuration"]
         user_message = chat.user_message
 
         chatbot_history = "\n".join(prev_messages) if prev_messages else ""
@@ -44,7 +41,9 @@ def chatbot(chat: ChatbotModels.ChatRequest) -> str:
         prompt_template = PromptTemplate(
             input_variables=["website_description", "user_message",
                              "previous_user_messages", "ai_configuration"],
-            template=""" You are a customer service representative for a business. You are chatting with a customer who is asking a question about the business. You need to provide an answer to the customer's question.
+            template=""" You are a customer service representative for a business. 
+            You are chatting with a customer who is asking a question about the business. 
+            +6You need to provide an answer to the customer's question.
             For your context, Here is the business description: {website_description}, 
             Previous Messages of customer: {previous_user_messages},
             Here is how you shall respond: {ai_configuration}

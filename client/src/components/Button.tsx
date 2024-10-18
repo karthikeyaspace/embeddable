@@ -24,7 +24,7 @@ interface ButtonProps {
   color: string;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
   disabled?: boolean;
-  className?: string;
+  class?: string;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -35,7 +35,7 @@ const Button: React.FC<ButtonProps> = ({
   color,
   onClick,
   disabled,
-  className,
+  class: className = "",
 }) => {
   const Icon = logo ? logoMap[logo] : null;
 

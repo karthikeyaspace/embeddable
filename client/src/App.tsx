@@ -8,6 +8,8 @@ import CreateChatbot from "./pages/CreateChatbot";
 import Providers from "./context/Providers";
 import Dashboard from "./pages/Dashboard";
 
+import { Toaster } from "react-hot-toast";
+
 const App: React.FC = () => {
   return (
     <Providers>
@@ -25,6 +27,7 @@ const App: React.FC = () => {
           <Route path="/chat/:id" element={<Chatbot />} />
         </Routes>
       </Router>
+      <Toaster />
     </Providers>
   );
 };

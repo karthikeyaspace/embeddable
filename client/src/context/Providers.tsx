@@ -1,12 +1,12 @@
 import React from "react";
-import { AuthProvider } from "./AuthContext";
+import { UserProvier } from "./UserContext";
 import { ThemeProvider } from "./ThemeContext";
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
-    <AuthProvider>
+    <UserProvier>
       <ThemeProvider>{children}</ThemeProvider>
-    </AuthProvider>
+    </UserProvier>
   );
 };
 

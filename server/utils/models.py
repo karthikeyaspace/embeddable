@@ -3,6 +3,10 @@ from pydantic import BaseModel
 class UserModels:
     class GetUserRequest(BaseModel):
         user_id: str
+    
+    class LoginRequest(BaseModel):
+        email: str
+        password: str
 
     class CreateUserRequest(BaseModel):
         email: str

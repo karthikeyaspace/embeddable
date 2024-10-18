@@ -1,5 +1,5 @@
 from db import (
-    create_user_db, get_user_db, get_chatbot_db,
+    create_user_db, get_user_db, get_user_db_login, get_chatbot_db,
     edit_chatbot_db, create_chatbot_db, get_users_chatbots_db
 )
 from utils.models import UserModels, ChatbotModels
@@ -16,11 +16,20 @@ class UserController:
         return {"success": False, "message": "User not found"}
 
     @staticmethod
+    async def login(user: UserModels.LoginRequest):
+        userdb = get_user_db_login(email=user.email, password=user.password)
+        if userdb:
+            return {"success": True, "userId": userdb.user_id}
+        return {"success": False, "message": "Invalid credentials"}
+
+    @staticmethod
     async def create_user(user: UserModels.CreateUserRequest):
         user_id = str(uuid4())
         result = create_user_db(
             user.email, user.password, user_id, role="user")
-        return {"success": result, "message": "User created successfully" if result else "Failed to create user"}
+        if result:
+            return {"success": True, "userId": user_id}
+        return {"success": False, "message": "Failed to create user"}
 
 
 class ChatbotController:
@@ -47,7 +56,6 @@ class ChatbotController:
         if chatbot:
             return {"success": True, "chatbot": chatbot}
 
-    
     @staticmethod
     async def edit_chatbot(chatbot: ChatbotModels.CreateChatbot):
         result = edit_chatbot_db(chatbot)

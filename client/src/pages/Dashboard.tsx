@@ -1,33 +1,31 @@
-import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import { PlusCircle, Settings, Copy, Trash2 } from 'lucide-react';
-import api from '../utils/axios';
-import { useAuth } from '../context/AuthContext';
-import { ChatbotConfig } from '../utils/types';
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { PlusCircle, Settings, Copy, Trash2 } from "lucide-react";
+import api from "../utils/axios";
+import { ChatbotConfig } from "../utils/types";
 
 const Dashboard: React.FC = () => {
   const [chatbot, setChatbot] = useState<ChatbotConfig | null>({
-    logo_url: '',
-    image_url: '',
-    user_name: '',
-    website_url: '',
-    chatbot_type: 'personal',
-    home_message: '',
-    description: '',
-    contact_link: '',
-    default_questions: [''],
-    greeting_message: '',
-    error_response: '',
+    logo_url: "",
+    image_url: "",
+    user_name: "",
+    website_url: "",
+    chatbot_type: "personal",
+    home_message: "",
+    description: "",
+    contact_link: "",
+    default_questions: [""],
+    greeting_message: "",
+    error_response: "",
     ai_configuration: [],
   });
-  const { userId } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchChatbot() {
       try {
-        const res = await api.post('/chatbots', { userId });
+        const res = await api.post("/chatbots", { user_id: "asdfasdf" });
         if (res.data.success && res.data.chatbots.length > 0) {
           setChatbot(res.data.chatbots[0]);
         }
@@ -35,27 +33,27 @@ const Dashboard: React.FC = () => {
         console.error(err);
       }
     }
-    fetchChatbot();
-  }, [userId]);
+    // fetchChatbot();
+  }, []);
 
   const handleCreateChatbot = () => {
-    navigate('/dashboard/create');
+    navigate("/dashboard/create");
   };
 
   const handleEditChatbot = () => {
-    navigate('/dashboard/create', { state: { chatbot } });
+    navigate("/dashboard/create", { state: { chatbot } });
   };
 
   const handleDeleteChatbot = async () => {
-    if (window.confirm('Are you sure you want to delete this chatbot?')) {
-      console.log('Deleting chatbot...');
+    if (window.confirm("Are you sure you want to delete this chatbot?")) {
+      console.log("Deleting chatbot...");
     }
   };
 
   const copyEmbedCode = () => {
     const embedCode = `<script src="https://embeddable.com/chatbot.js" data-id="${"adfadsf"}"></script>`;
     navigator.clipboard.writeText(embedCode);
-    alert('Embed code copied to clipboard!');
+    alert("Embed code copied to clipboard!");
   };
 
   return (
@@ -69,7 +67,9 @@ const Dashboard: React.FC = () => {
           className="bg-gray-100 rounded-lg p-6 shadow-md"
         >
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold text-black">{chatbot.user_name}'s Chatbot</h2>
+            <h2 className="text-2xl font-semibold text-black">
+              {chatbot.user_name}'s Chatbot
+            </h2>
             <div className="space-x-2">
               <button
                 onClick={handleEditChatbot}

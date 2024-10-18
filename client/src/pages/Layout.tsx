@@ -47,7 +47,7 @@ const Layout: React.FC = () => {
             {sidebarItems.find(item => item.path === location.pathname)?.label || "Dashboard"}
           </h1>
         </header>
-        <main className="flex-grow overflow-auto p-6">
+        <main className="flex-grow overflow-auto">
           <Outlet />
         </main>
       </div>

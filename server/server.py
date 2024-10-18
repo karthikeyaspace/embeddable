@@ -30,13 +30,18 @@ async def root():
     return "Embeddable AI"
 
 
-@app.post("/user/get")
+@app.post("/user")
 async def get_user(request: UserModels.GetUserRequest):
     return await UserController.get_user(request.user_id)
 
 
-@app.post("/user/post")
-async def create_user(request: UserModels.CreateUserRequest):
+@app.post("/login")
+async def login(request: UserModels.LoginRequest):
+    return await UserController.login(request)
+
+
+@app.post("/register")
+async def register(request: UserModels.CreateUserRequest):
     return await UserController.create_user(request)
 
 

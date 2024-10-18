@@ -25,6 +25,16 @@ def get_user_db(user_id: str) -> dict | None:
         return None
 
 
+def get_user_db_login(email: str, password: str) -> dict | None:
+    try:
+        user = db.collection("embeddable.users").where(
+            "email", "==", email).where("password", "==", password).get()
+        return user[0].to_dict() if user else None
+    except Exception as e:
+        logger.error(f"Error retrieving user: {e}")
+        return None
+
+
 def create_user_db(email: str, password: str, user_id: str, role: str) -> bool:
     try:
         db.collection("embeddable.users").document(user_id).set({

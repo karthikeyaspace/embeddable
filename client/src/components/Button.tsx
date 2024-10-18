@@ -21,7 +21,6 @@ interface ButtonProps {
   text: string;
   textColor?: string;
   logo?: string;
-  color: string;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
   disabled?: boolean;
   class?: string;
@@ -32,7 +31,6 @@ const Button: React.FC<ButtonProps> = ({
   text,
   textColor = "text-white",
   logo,
-  color,
   onClick,
   disabled,
   class: className = "",
@@ -42,7 +40,7 @@ const Button: React.FC<ButtonProps> = ({
   return (
     <button
       type={type}
-      className={`px-4 py-2 ${textColor} bg-${color}-500 rounded-md flex items-center ${className}`}
+      className={`px-4 py-2 ${textColor} bg-black rounded-md flex items-center ${className}`}
       onClick={onClick}
       disabled={disabled}
     >

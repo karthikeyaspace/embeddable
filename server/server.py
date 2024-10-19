@@ -56,9 +56,9 @@ async def edit_chatbot(request: ChatbotModels.CreateChatbot):
 
 
 @app.post("/create-chatbot")
-async def create_chatbot(config: ChatbotModels.CreateChatbot):
-    print(config)
-    return await ChatbotController.create_chatbot(chatbot=config)
+async def create_chatbot(request: ChatbotModels.CreateChatbot):
+    print(request)
+    return await ChatbotController.create_chatbot(request)
 
 
 @app.post("/embedchatbot")
@@ -73,7 +73,7 @@ async def chat(request: ChatbotModels.ChatRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="localhost", port=8000)
+    uvicorn.run(app, host="localhost", port=8001)
 
 
 # uvicorn server:app --reload

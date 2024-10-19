@@ -5,6 +5,7 @@ import ChatbotPreview from "../components/ChatbotPreview";
 import api from "../utils/axios";
 import Button from "../components/Button";
 import { useUser } from "../context/UserContext";
+import { PlusCircle } from "lucide-react";
 
 const CreateChatbot: React.FC = () => {
   const [step, setStep] = useState(0);
@@ -41,14 +42,13 @@ const CreateChatbot: React.FC = () => {
     e.preventDefault();
     try {
       config.user_id = userId;
-      const res = await api.post("/create-chatbot", { config:config });
-      console.log(res.data);
-      // if (res.data.success) {
-      //   console.log(res.data.chatbotId);
-      //   localStorage.setItem("embeddable.config", JSON.stringify(config));
-      // } else {
-      //   console.log("Failed to create chatbot");
-      // }
+      const res = await api.post("/create-chatbot", config);
+      if (res.data.success) {
+        console.log(res.data.chatbotId);
+        localStorage.setItem("embeddable.config", JSON.stringify(config));
+      } else {
+        console.log("Failed to create chatbot");
+      }
     } catch (err) {
       console.log(err);
     }
@@ -378,12 +378,13 @@ const CreateChatbot: React.FC = () => {
                 class="ml-auto transition"
               />
             ) : (
-              <Button
+              <button
+                className="px-4 py-2 bg-black text-white ml-auto transition flex justify-center items-center rounded-md"
                 type="submit"
-                text={chatbotConfig ? "Update Chatbot" : "Create Chatbot"}
-                logo=""
-                class="ml-auto transition"
-              />
+              >
+                <PlusCircle className="mr-2 w-4 h-4" />{" "}
+                {chatbotConfig ? "Update" : "Create"} Chatbot
+              </button>
             )}
           </div>
         </form>

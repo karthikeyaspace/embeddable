@@ -1,26 +1,34 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChatbotConfig } from "../utils/types";
 import ChatbotPreview from "../components/ChatbotPreview";
 import api from "../utils/axios";
 import Button from "../components/Button";
+import { useUser } from "../context/UserContext";
 
 const CreateChatbot: React.FC = () => {
   const [step, setStep] = useState(0);
-  const [config, setConfig] = useState<ChatbotConfig>({
-    logo_url: "",
-    image_url: "",
-    user_name: "",
-    website_url: "",
-    chatbot_type: "personal",
-    home_message: "",
-    description: "",
-    contact_link: "",
-    default_questions: [""],
-    greeting_message: "",
-    error_response: "",
-    ai_configuration: [],
-  });
+  const { chatbotConfig, userId, fetchChatbot } = useUser();
+  const [config, setConfig] = useState<ChatbotConfig>(
+    chatbotConfig || {
+      logo_url: "",
+      image_url: "",
+      user_name: "",
+      website_url: "",
+      chatbot_type: "personal",
+      home_message: "",
+      description: "",
+      contact_link: "",
+      greeting_message: "",
+      error_response: "",
+      default_questions: ["", "", ""],
+      ai_configuration: [{ user_question: "", ai_response: "" }],
+    }
+  );
+
+  useEffect(() => {
+    fetchChatbot();
+  }, []);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -31,19 +39,19 @@ const CreateChatbot: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(config);
-    // try {
-    //   const res = await api.post("/create-chatbot", { config });
-    //   if (res.data.success) {
-    //     console.log(res.data.script);
-    //   } else {
-    //     console.log("Failed to create chatbot");
-    //   }
-    // } catch (err) {
-    //   console.log(err);
-    // }
-
-    // localStorage.setItem("embeddable.config", JSON.stringify(config))
+    try {
+      config.user_id = userId;
+      const res = await api.post("/create-chatbot", { config:config });
+      console.log(res.data);
+      // if (res.data.success) {
+      //   console.log(res.data.chatbotId);
+      //   localStorage.setItem("embeddable.config", JSON.stringify(config));
+      // } else {
+      //   console.log("Failed to create chatbot");
+      // }
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const steps = [
@@ -372,7 +380,7 @@ const CreateChatbot: React.FC = () => {
             ) : (
               <Button
                 type="submit"
-                text="Create Chatbot"
+                text={chatbotConfig ? "Update Chatbot" : "Create Chatbot"}
                 logo=""
                 class="ml-auto transition"
               />

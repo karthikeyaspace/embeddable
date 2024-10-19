@@ -7,15 +7,17 @@ import {
 } from "react";
 import { ChatbotConfig } from "../utils/types";
 import api from "../utils/axios";
+import t from "../components/Toast";
 
 interface User {
   userId: string;
   status: "authenticated" | "unauthenticated" | "loading";
-  chatbotConfig: ChatbotConfig;
+  chatbotConfig: ChatbotConfig | null;
   setChatbotConfig: (config: ChatbotConfig) => void;
   login: (username: string, password: string) => Promise<boolean>;
   register: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
+  fetchChatbot: () => void;
 }
 
 const UserContext = createContext<User | undefined>(undefined);
@@ -25,20 +27,9 @@ const UserProvier = ({ children }: { children: ReactNode }) => {
   const [status, setStatus] = useState<
     "authenticated" | "unauthenticated" | "loading"
   >("loading");
-  const [chatbotConfig, setChatbotConfig] = useState<ChatbotConfig>({
-    logo_url: "",
-    image_url: "",
-    user_name: "",
-    website_url: "",
-    chatbot_type: "personal",
-    home_message: "",
-    description: "",
-    contact_link: "",
-    default_questions: [""],
-    greeting_message: "",
-    error_response: "",
-    ai_configuration: [],
-  });
+  const [chatbotConfig, setChatbotConfig] = useState<ChatbotConfig | null>(
+    null
+  );
   // fetch for status - valid token
 
   useEffect(() => {
@@ -51,6 +42,29 @@ const UserProvier = ({ children }: { children: ReactNode }) => {
       setStatus("authenticated");
     } else setStatus("unauthenticated");
   }, []);
+
+  const fetchChatbot = async () => {
+    const storeConfig = localStorage.getItem("embeddable.config");
+    if (storeConfig) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setChatbotConfig(JSON.parse(storeConfig));
+      return;
+    }
+    try {
+      const res = await api.post("/chatbot", { user_id: userId });
+      console.log(res.data);
+      if (res.data.success) {
+        localStorage.setItem(
+          "embeddable.config",
+          JSON.stringify(res.data.chatbot)
+        );
+        setChatbotConfig(res.data.chatbots);
+      } else t("No Chatbot found", "success");
+    } catch (err) {
+      t("Failed to Fetch", "error");
+      console.error(err);
+    }
+  };
 
   const login = async (
     username: string,
@@ -102,12 +116,8 @@ const UserProvier = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    if (status === "authenticated") {
-      // api.get(`/chatbot/${userId}`).then((res) => {
-      //     setChatbotConfig(res.data);
-      //     setChatbotId(res.data._id);
-      // });
-    }
+    if (status === "authenticated") fetchChatbot();
+    else return;
   }, [status, userId]);
 
   return (
@@ -120,6 +130,7 @@ const UserProvier = ({ children }: { children: ReactNode }) => {
         login,
         register,
         logout,
+        fetchChatbot,
       }}
     >
       {children}

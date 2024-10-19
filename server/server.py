@@ -45,19 +45,20 @@ async def register(request: UserModels.CreateUserRequest):
     return await UserController.create_user(request)
 
 
-@app.post("/chatbots")
+@app.post("/chatbot")
 async def get_chatbot(request: ChatbotModels.GetChatbotRequest):
-    return await ChatbotController.get_users_chatbots(request.user_id)
+    return await ChatbotController.get_users_chatbot(request.user_id)
 
 
-@app.post("/chatbots/{chatbot_id}/edit")
+@app.post("/chatbot/{chatbot_id}/edit")
 async def edit_chatbot(request: ChatbotModels.CreateChatbot):
     return await ChatbotController.edit_chatbot(request)
 
 
 @app.post("/create-chatbot")
-async def create_chatbot(request: ChatbotModels.CreateChatbot):
-    return await ChatbotController.create_chatbot(request)
+async def create_chatbot(config: ChatbotModels.CreateChatbot):
+    print(config)
+    return await ChatbotController.create_chatbot(chatbot=config)
 
 
 @app.post("/embedchatbot")

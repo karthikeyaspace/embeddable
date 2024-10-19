@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation, Outlet } from "react-router-dom";
-import { Home, PlusCircle, BarChart, Settings } from "lucide-react";
+import { Home, PlusCircle, BarChart, Settings, TestTube2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 const Layout: React.FC = () => {
@@ -8,18 +8,14 @@ const Layout: React.FC = () => {
   const sidebarItems = [
     { path: "/dashboard", icon: Home, label: "Home" },
     { path: "/dashboard/create", icon: PlusCircle, label: "Create Chatbot" },
+    { path: "/dashboard/test", icon: TestTube2, label: "Test your bot" },
     { path: "/dashboard/analytics", icon: BarChart, label: "Analytics" },
     { path: "/dashboard/settings", icon: Settings, label: "Settings" },
   ];
 
   return (
     <div className="flex h-screen bg-white">
-      <motion.div
-        initial={{ x: -250 }}
-        animate={{ x: 0 }}
-        transition={{ duration: 0.5 }}
-        className="bg-black text-white w-64 p-6 flex-shrink-0"
-      >
+      <motion.div className="bg-black text-white w-64 p-6 flex-shrink-0">
         <h2 className="text-2xl font-bold mb-8 tracking-wide">embeddable</h2>
         <nav>
           <ul className="space-y-2">
@@ -44,7 +40,8 @@ const Layout: React.FC = () => {
       <div className="flex-grow flex flex-col overflow-hidden">
         <header className="bg-white border-b border-gray-200 p-4">
           <h1 className="text-xl text-black font-semibold">
-            {sidebarItems.find(item => item.path === location.pathname)?.label || "Dashboard"}
+            {sidebarItems.find((item) => item.path === location.pathname)
+              ?.label || "Dashboard"}
           </h1>
         </header>
         <main className="flex-grow overflow-auto">

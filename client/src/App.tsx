@@ -21,6 +21,8 @@ const App: React.FC = () => {
             <Route index element={<Dashboard />} />
             <Route path="create" element={<CreateChatbot />} />
             <Route path="analytics" element={<h1>Coming Soon</h1>} />
+            <Route path="test" element={<h1>All Chatbots</h1>} />
+            <Route path="settings" element={<h1>Settings</h1>} />
             <Route path="*" element={<h1>Not Found</h1>} />
           </Route>
           <Route path="/chat" element={<Chatbot />} />

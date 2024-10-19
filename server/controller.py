@@ -34,20 +34,18 @@ class UserController:
 
 class ChatbotController:
     @staticmethod
-    async def get_users_chatbots(user_id: str):
-        chatbots = get_users_chatbots_db(user_id)
-        if chatbots:
-            return {"success": True, "chatbots": chatbots}
-        return {"success": False, "message": "Chatbots not found"}
+    async def get_users_chatbot(user_id: str):
+        chatbot = get_users_chatbots_db(user_id)
+        if chatbot != None:
+            return {"success": True, "chatbot": chatbot}
+        return {"success": False, "message": "Chatbot not found"}
 
     @staticmethod
     async def create_chatbot(chatbot: ChatbotModels.CreateChatbot):
         result = create_chatbot_db(chatbot)
         if result:
             chatbot_id = result
-            script = f'<script src="http://localhost:5173/chatbot.js" data-id="{
-                chatbot_id}"></script>'
-            return {"success": True, "script": script}
+            return {"success": True, "chatbotId": chatbot_id}
         return {"success": False, "message": "Some error occurred"}
 
     @staticmethod

@@ -18,7 +18,7 @@ const Chatbot: React.FC = () => {
   const [config, setConfig] = useState<ChatbotConfig>({
     image_url:
       "https://avatars.githubusercontent.com/u/112397111?s=400&u=45930fe8e389287b7ce146eec80a826bcada8ff3&v=4",
-    logo_url: "https://kv3.vercel.app/logo-white.svg",
+    logo_url: "https://itskv.me/logo-white.svg",
     user_name: "Karthikeya",
     website_url: "kv3.vercel.app",
     chatbot_type: "personal",

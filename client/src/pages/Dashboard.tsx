@@ -2,38 +2,21 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { PlusCircle, Settings, Copy, Trash2 } from "lucide-react";
-import api from "../utils/axios";
-import { ChatbotConfig } from "../utils/types";
+
+import { useUser } from "../context/UserContext";
+import env from "../utils/env";
 
 const Dashboard: React.FC = () => {
-  const [chatbot, setChatbot] = useState<ChatbotConfig | null>({
-    logo_url: "",
-    image_url: "",
-    user_name: "",
-    website_url: "",
-    chatbot_type: "personal",
-    home_message: "",
-    description: "",
-    contact_link: "",
-    default_questions: [""],
-    greeting_message: "",
-    error_response: "",
-    ai_configuration: [],
-  });
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { chatbotConfig, fetchChatbot } = useUser();
 
   useEffect(() => {
-    async function fetchChatbot() {
-      try {
-        const res = await api.post("/chatbots", { user_id: "asdfasdf" });
-        if (res.data.success && res.data.chatbots.length > 0) {
-          setChatbot(res.data.chatbots[0]);
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    }
-    // fetchChatbot();
+    const asyncFetch = async () => {
+      await fetchChatbot();
+      setLoading(false);
+    };
+    asyncFetch();
   }, []);
 
   const handleCreateChatbot = () => {
@@ -41,7 +24,7 @@ const Dashboard: React.FC = () => {
   };
 
   const handleEditChatbot = () => {
-    navigate("/dashboard/create", { state: { chatbot } });
+    navigate("/dashboard/create", { state: { chatbotConfig } });
   };
 
   const handleDeleteChatbot = async () => {
@@ -51,15 +34,19 @@ const Dashboard: React.FC = () => {
   };
 
   const copyEmbedCode = () => {
-    const embedCode = `<script src="https://embeddable.com/chatbot.js" data-id="${"adfadsf"}"></script>`;
+    const embedCode = `<script src="${env.BASE_URL}/chatbot.js" data-id="${chatbotConfig?.chatbot_id}"></script>`;
     navigator.clipboard.writeText(embedCode);
     alert("Embed code copied to clipboard!");
   };
 
   return (
-    <div className="min-h-screen bg-white p-8">
-      <h1 className="text-4xl font-bold mb-8 text-black">Dashboard</h1>
-      {chatbot ? (
+    <div className="bg-white p-6 overflow-auto small-scrollbar">
+      <p className="pb-4 text-lg">Your chatbot</p>
+      {loading ? (
+        <div className="items-center">
+          <p>Loading...</p>
+        </div>
+      ) : chatbotConfig ? (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -68,7 +55,7 @@ const Dashboard: React.FC = () => {
         >
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-semibold text-black">
-              {chatbot.user_name}'s Chatbot
+              {chatbotConfig.user_name}'s Chatbot
             </h2>
             <div className="space-x-2">
               <button
@@ -94,19 +81,19 @@ const Dashboard: React.FC = () => {
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white p-4 rounded-md shadow">
               <h3 className="font-semibold mb-2">Chatbot Type</h3>
-              <p className="capitalize">{chatbot.chatbot_type}</p>
+              <p className="capitalize">{chatbotConfig.chatbot_type}</p>
             </div>
             <div className="bg-white p-4 rounded-md shadow">
               <h3 className="font-semibold mb-2">Website URL</h3>
-              <p className="truncate">{chatbot.website_url}</p>
+              <p className="truncate">{chatbotConfig.website_url}</p>
             </div>
             <div className="bg-white p-4 rounded-md shadow">
               <h3 className="font-semibold mb-2">Default Questions</h3>
-              <p>{chatbot.default_questions.length}</p>
+              <p>{chatbotConfig.default_questions.length}</p>
             </div>
             <div className="bg-white p-4 rounded-md shadow">
               <h3 className="font-semibold mb-2">AI Configurations</h3>
-              <p>{chatbot.ai_configuration?.length || 0}</p>
+              <p>{chatbotConfig.ai_configuration?.length || 0}</p>
             </div>
           </div>
         </motion.div>

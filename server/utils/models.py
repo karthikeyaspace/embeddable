@@ -1,9 +1,11 @@
 from pydantic import BaseModel
+from typing import List, Dict
+
 
 class UserModels:
     class GetUserRequest(BaseModel):
         user_id: str
-    
+
     class LoginRequest(BaseModel):
         email: str
         password: str
@@ -22,26 +24,24 @@ class ChatbotModels:
 
     class CreateChatbot(BaseModel):
         user_id: str
-        website: str
         logo_url: str
         image_url: str
         user_name: str
         website_url: str
         chatbot_type: str
         home_message: str
-        description: str | None
+        description: str
         contact_link: str
-        default_questions: list[str]
+        default_questions: List[str]
         greeting_message: str
         error_response: str
-        ai_configuration: list[dict[str, str]] | None
+        ai_configuration: List[Dict[str, str]]
 
     class ChatRequest(BaseModel):
         # customer_id: str - used for analytics, no need now
         chatbot_id: str
         user_message: str
         prev_messages: list[str] | None
-
 
 
 '''

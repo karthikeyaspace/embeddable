@@ -1,4 +1,6 @@
 export interface ChatbotConfig {
+  user_id?: string;
+  chatbot_id?: string;
   logo_url: string;
   image_url: string;
   user_name: string;
@@ -15,4 +17,3 @@ export interface ChatbotConfig {
     ai_response: string; // what should the AI respond with?
   }[];
 }
-

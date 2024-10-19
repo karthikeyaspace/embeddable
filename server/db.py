@@ -89,7 +89,7 @@ def get_users_chatbots_db(user_id: str) -> list[dict] | None:
         chatbots_list = []
         for chatbot in chatbots:
             chatbots_list.append(chatbot.to_dict())
-        return chatbots_list
+        return chatbots_list[0] if chatbots_list else None
     except Exception as e:
         logger.error(f"Error retrieving chatbots: {e}")
         return None

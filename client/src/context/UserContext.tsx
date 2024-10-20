@@ -13,12 +13,27 @@ interface User {
   userId: string;
   status: "authenticated" | "unauthenticated" | "loading";
   chatbotConfig: ChatbotConfig | null;
-  setChatbotConfig: (config: ChatbotConfig) => void;
+  setChatbotConfig: React.Dispatch<React.SetStateAction<ChatbotConfig | null>>;
   login: (username: string, password: string) => Promise<boolean>;
   register: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
-  fetchChatbot: () => void;
+  fetchChatbot: () => Promise<ChatbotConfig | null>;
 }
+
+const defaultConfig: ChatbotConfig = {
+  logo_url: "",
+  image_url: "",
+  user_name: "",
+  website_url: "",
+  chatbot_type: "personal",
+  home_message: "",
+  description: "",
+  contact_link: "",
+  greeting_message: "",
+  error_response: "",
+  default_questions: ["", "", ""],
+  ai_configuration: [{ user_question: "", ai_response: "" }],
+};
 
 const UserContext = createContext<User | undefined>(undefined);
 
@@ -30,10 +45,8 @@ const UserProvier = ({ children }: { children: ReactNode }) => {
   const [chatbotConfig, setChatbotConfig] = useState<ChatbotConfig | null>(
     null
   );
-  // fetch for status - valid token
 
   useEffect(() => {
-    // now just check for token and userId in local storage
     const token = localStorage.getItem("embeddable.token");
     const userId = localStorage.getItem("embeddable.userId");
 
@@ -43,82 +56,94 @@ const UserProvier = ({ children }: { children: ReactNode }) => {
     } else setStatus("unauthenticated");
   }, []);
 
+  useEffect(() => {
+    if (status === "authenticated") fetchChatbot();
+  }, [status, userId]);
+
+  console.log(chatbotConfig);
+
   const fetchChatbot = async () => {
+    if (!userId) {
+      return null;
+    }
     const storeConfig = localStorage.getItem("embeddable.config");
     if (storeConfig) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setChatbotConfig(JSON.parse(storeConfig));
-      return;
+      const parsedConfig = JSON.parse(storeConfig);
+      setChatbotConfig(parsedConfig);
+      return parsedConfig;
     }
     try {
-      const res = await api.post("/chatbot", { user_id: userId });
-      console.log(res.data);
+      const res = await api.post("/getbot", { user_id: userId });
       if (res.data.success) {
+        const fetchedConfig = res.data.chatbot;
         localStorage.setItem(
           "embeddable.config",
-          JSON.stringify(res.data.chatbot)
+          JSON.stringify(fetchedConfig)
         );
-        setChatbotConfig(res.data.chatbots);
-      } else t("No Chatbot found", "success");
+        setChatbotConfig(fetchedConfig);
+        return fetchedConfig;
+      } else {
+        t("No Chatbot found", "success");
+      }
     } catch (err) {
-      t("Failed to Fetch", "error");
       console.error(err);
+      t("Failed to Fetch", "error");
+      return null;
     }
   };
 
-  const login = async (
-    username: string,
-    password: string
-  ): Promise<boolean> => {
-    return await api
-      .post("/login", { username, password })
-      .then((res) => {
-        if (res.data.success) {
-          setUserId(res.data.userId);
-          setStatus("authenticated");
-          return true;
-        } else {
-          setStatus("unauthenticated");
-          return false;
-        }
-      })
-      .catch(() => {
+  const login = async (email: string, password: string): Promise<boolean> => {
+    try {
+      const res = await api.post("/login", { email, password });
+      console.log(res.data)
+      if (res.data.success) {
+        setUserId(res.data.userId);
+        setStatus("authenticated");
+        localStorage.setItem("embeddable.token", res.data.token);
+        localStorage.setItem("embeddable.userId", res.data.userId);
+        return true;
+      } else {
         setStatus("unauthenticated");
         return false;
-      });
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setStatus("unauthenticated");
+      return false;
+    }
   };
 
   const register = async (
-    username: string,
+    email: string,
     password: string
   ): Promise<boolean> => {
-    return await api
-      .post("/register", { username, password })
-      .then((res) => {
-        if (res.data.success) {
-          setUserId(res.data.userId);
-          setStatus("authenticated");
-          return true;
-        } else {
-          setStatus("unauthenticated");
-          return false;
-        }
-      })
-      .catch(() => {
+    try {
+      const res = await api.post("/register", { email, password });
+      if (res.data.success) {
+        setUserId(res.data.userId);
+        setStatus("authenticated");
+        localStorage.setItem("embeddable.token", res.data.token);
+        localStorage.setItem("embeddable.userId", res.data.userId);
+        return true;
+      } else {
         setStatus("unauthenticated");
         return false;
-      });
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      setStatus("unauthenticated");
+      return false;
+    }
   };
 
   const logout = () => {
     setUserId("");
     setStatus("unauthenticated");
+    setChatbotConfig(null);
+    localStorage.removeItem("embeddable.token");
+    localStorage.removeItem("embeddable.userId");
+    localStorage.removeItem("embeddable.config");
   };
-
-  useEffect(() => {
-    if (status === "authenticated") fetchChatbot();
-    else return;
-  }, [status, userId]);
 
   return (
     <UserContext.Provider

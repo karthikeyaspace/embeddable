@@ -1,5 +1,8 @@
 <!-- docker run -d -e POSTGRES_DB=embed -e POSTGRES_PASSWORD=embed -e POSTGRES_USER=embed -p 6500:5432 postgres:latest -->
 
+# On Progress - Building
+### embeddable
+
 ### What more can be done
 
 - store customer id and chat history in frontend local storage - since it is temporary
@@ -18,8 +21,12 @@
 
 <!--
 - centralize .env
+
+- reduce number of backend routes - /, /login, /getbot, /makebot - create and edit, /embedbot, /chat
 - do if else for all the api calls
 - perform validation in frontend and backend 
 - after finishing - optimize the code - reduce db calls etc
 - try storing prev messages, ai config, description in localstorage
+- may be store ai config in session storage
+- use context sent req 3 times when logged in - fix it
 -->

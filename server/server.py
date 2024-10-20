@@ -29,37 +29,28 @@ logger = logging.getLogger(__name__)
 async def root():
     return "Embeddable AI"
 
-
-@app.post("/user")
-async def get_user(request: UserModels.GetUserRequest):
-    return await UserController.get_user(request.user_id)
-
+# merge
 
 @app.post("/login")
 async def login(request: UserModels.LoginRequest):
     return await UserController.login(request)
-
 
 @app.post("/register")
 async def register(request: UserModels.CreateUserRequest):
     return await UserController.create_user(request)
 
 
-@app.post("/chatbot")
+@app.post("/getbot")
 async def get_chatbot(request: ChatbotModels.GetChatbotRequest):
     return await ChatbotController.get_users_chatbot(request.user_id)
 
 
-@app.post("/chatbot/{chatbot_id}/edit")
-async def edit_chatbot(request: ChatbotModels.CreateChatbot):
-    return await ChatbotController.edit_chatbot(request)
+@app.post("/makebot")
+async def makebot(request: ChatbotModels.CreateChatbot):
+    return await ChatbotController.create_edit_chatbot(request)
 
 
-@app.post("/create-chatbot")
-async def create_chatbot(request: ChatbotModels.CreateChatbot):
-    print(request)
-    return await ChatbotController.create_chatbot(request)
-
+# after embedding routes
 
 @app.post("/embedchatbot")
 async def get_chatbot_details(request: ChatbotModels.GetChatbotDetailsRequest):

@@ -2,9 +2,11 @@ import React from "react";
 import { Link, useLocation, Outlet } from "react-router-dom";
 import { Home, PlusCircle, BarChart, Settings, TestTube2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useUser } from "../context/UserContext";
 
 const Layout: React.FC = () => {
   const location = useLocation();
+  const { logout } = useUser();
   const sidebarItems = [
     { path: "/dashboard", icon: Home, label: "Home" },
     { path: "/dashboard/create", icon: PlusCircle, label: "Create Chatbot" },
@@ -15,9 +17,9 @@ const Layout: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-white">
-      <motion.div className="bg-black text-white w-64 p-6 flex-shrink-0">
-        <h2 className="text-2xl font-bold mb-8 tracking-wide">embeddable</h2>
+      <motion.div className="bg-black text-white w-64 p-6 flex-shrink-0 flex flex-col justify-between">
         <nav>
+          <h2 className="text-2xl font-bold mb-8 tracking-wide">embeddable</h2>
           <ul className="space-y-2">
             {sidebarItems.map((item) => (
               <li key={item.path}>
@@ -36,6 +38,15 @@ const Layout: React.FC = () => {
             ))}
           </ul>
         </nav>
+        <button
+          className="w-1/2 py-2 border border-white/50 rounded-md hover:bg-white hover:text-black transition-colors"
+          onClick={() => {
+            logout();
+            window.location.href = "/";
+          }}
+        >
+          Logout
+        </button>
       </motion.div>
       <div className="flex-grow flex flex-col overflow-hidden">
         <header className="bg-white border-b border-gray-200 p-4">

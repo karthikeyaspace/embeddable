@@ -24,12 +24,17 @@ def get_user_db(user_id: str) -> dict | None:
         logger.error(f"Error retrieving user: {e}")
         return None
 
+# merge
+
 
 def get_user_db_login(email: str, password: str) -> dict | None:
     try:
         user = db.collection("embeddable.users").where(
-            "email", "==", email).where("password", "==", password).get()
-        return user[0].to_dict() if user else None
+            "email", "==", email).where("password", "==", password).stream()
+        for u in user:
+            return u.to_dict()
+        return None
+
     except Exception as e:
         logger.error(f"Error retrieving user: {e}")
         return None
@@ -76,6 +81,10 @@ def create_chatbot_db(chatbot: ChatbotModels.CreateChatbot) -> str | bool:
         chatbot_dict = chatbot.model_dump()
         chatbot_dict["chatbot_id"] = chatbot_id
         chatbots.set(chatbot_dict)
+        user = db.collection("embeddable.users").document(chatbot.user_id)
+        user.update({
+            "chatbots": firestore.ArrayUnion([chatbot_id])
+        })
         return chatbot_id
     except Exception as e:
         logger.error(f"Error creating chatbot: {e}")
@@ -95,9 +104,8 @@ def get_users_chatbots_db(user_id: str) -> list[dict] | None:
         return None
 
 
-def edit_chatbot_db(chatbot: ChatbotModels.CreateChatbot) -> bool:
+def edit_chatbot_db(chatbot: ChatbotModels.CreateChatbot, chatbot_id: str) -> bool:
     try:
-        chatbot_id = chatbot.chatbot_id
         chatbot_dict = chatbot.model_dump()
         db.collection("embeddable.chatbots").document(
             chatbot_id).update(chatbot_dict)

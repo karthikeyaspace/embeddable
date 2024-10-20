@@ -6,54 +6,64 @@ import api from "../utils/axios";
 import Button from "../components/Button";
 import { useUser } from "../context/UserContext";
 import { PlusCircle } from "lucide-react";
+import t from "../components/Toast";
 
 const CreateChatbot: React.FC = () => {
   const [step, setStep] = useState(0);
   const { chatbotConfig, userId, fetchChatbot } = useUser();
   const [config, setConfig] = useState<ChatbotConfig>(
-    chatbotConfig || {
-      logo_url: "",
-      image_url: "",
-      user_name: "",
-      website_url: "",
-      chatbot_type: "personal",
-      home_message: "",
-      description: "",
-      contact_link: "",
-      greeting_message: "",
-      error_response: "",
-      default_questions: ["", "", ""],
-      ai_configuration: [{ user_question: "", ai_response: "" }],
-    }
+    chatbotConfig ||
+      JSON.parse(localStorage.getItem("embeddable.config")!) || {
+        chatbot_id: "",
+        logo_url: "",
+        image_url: "",
+        user_name: "",
+        website_url: "",
+        chatbot_type: "personal",
+        home_message: "",
+        description: "",
+        contact_link: "",
+        greeting_message: "",
+        error_response: "",
+        default_questions: ["", "", ""],
+        ai_configuration: [{ user_question: "", ai_response: "" }],
+      }
   );
 
   useEffect(() => {
-    fetchChatbot();
+    if (chatbotConfig) {
+      setConfig(chatbotConfig);
+    } else {
+      fetchChatbot().then((config) => {
+        if (config) {
+          setConfig(config);
+        }
+      });
+    }
   }, []);
-
+  localStorage.removeItem("embeddable.config");
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setConfig((prev) => ({ ...prev, [name]: value }));
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       config.user_id = userId;
-      const res = await api.post("/create-chatbot", config);
+      const res = await api.post("/makebot", config);
+      t(res.data.message, res.data.success ? "success" : "error");
       if (res.data.success) {
-        console.log(res.data.chatbotId);
+        if(res.data.message === "Chatbot created successfully") {
+          
+        } 
         localStorage.setItem("embeddable.config", JSON.stringify(config));
-      } else {
-        console.log("Failed to create chatbot");
       }
     } catch (err) {
       console.log(err);
     }
   };
-
   const steps = [
     {
       title: "Basic Info",

@@ -19,7 +19,7 @@ class UserController:
     async def login(user: UserModels.LoginRequest):
         userdb = get_user_db_login(email=user.email, password=user.password)
         if userdb:
-            return {"success": True, "userId": userdb.user_id}
+            return {"success": True, "userId": userdb['user_id']}
         return {"success": False, "message": "Invalid credentials"}
 
     @staticmethod
@@ -41,23 +41,23 @@ class ChatbotController:
         return {"success": False, "message": "Chatbot not found"}
 
     @staticmethod
-    async def create_chatbot(chatbot: ChatbotModels.CreateChatbot):
+    async def create_edit_chatbot(chatbot: ChatbotModels.CreateChatbot):
+        user_chatbot = get_users_chatbots_db(chatbot.user_id)
+        print("user", user_chatbot)
+        if user_chatbot:
+            result = edit_chatbot_db(chatbot, user_chatbot['chatbot_id'])
+            return {"success": result, "message": "Chatbot edited successfully" if result else "Failed to edit chatbot"}
         result = create_chatbot_db(chatbot)
         if result:
             chatbot_id = result
-            return {"success": True, "chatbotId": chatbot_id}
-        return {"success": False, "message": "Some error occurred"}
+            return {"success": True, "message": "Chatbot created succesfully", "chatbot_id": chatbot_id}
+        return {"success": False, "message": "Failed to create chatbot"}
 
     @staticmethod
     async def get_chatbot(chatbot_id: str):
         chatbot = get_chatbot_db(chatbot_id)
         if chatbot:
             return {"success": True, "chatbot": chatbot}
-
-    @staticmethod
-    async def edit_chatbot(chatbot: ChatbotModels.CreateChatbot):
-        result = edit_chatbot_db(chatbot)
-        return {"success": result, "message": "Chatbot edited successfully" if result else "Some error occurred"}
 
     @staticmethod
     async def chatai(chat: ChatbotModels.ChatRequest):

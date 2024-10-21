@@ -40,14 +40,14 @@ def chatbot(chat: ChatbotModels.ChatRequest) -> str:
                 config['user_question'] + " , then repond with " + \
                 config['ai_response'] + "\n"
             ai_config_string += text
-            
-        
+
+
         prompt_template = PromptTemplate(
             input_variables=["website_description", "user_message",
                              "previous_user_messages", "ai_configuration"],
             template=""" You are a customer service representative for a business. 
             You are chatting with a customer who is asking a question about the business. 
-            +6You need to provide an answer to the customer's question.
+            You need to provide an answer to the customer's question.
             For your context, Here is the business description: {website_description}, 
             Previous Messages of customer: {previous_user_messages},
             Here is how you shall respond: {ai_configuration}
@@ -57,7 +57,7 @@ def chatbot(chat: ChatbotModels.ChatRequest) -> str:
         )
 
         chain = LLMChain(llm=llm, prompt=prompt_template)
-        response = chain.invoke({   
+        response = chain.invoke({
             "website_description": description,
             "user_message": user_message,
             "previous_user_messages": chatbot_history,
@@ -65,7 +65,6 @@ def chatbot(chat: ChatbotModels.ChatRequest) -> str:
         })
 
         return response['text']
-
 
     except Exception as e:
         logger.error(f"Error running chatbot: \n{e}")

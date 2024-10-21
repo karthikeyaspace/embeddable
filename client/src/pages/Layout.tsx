@@ -49,12 +49,14 @@ const Layout: React.FC = () => {
         </button>
       </motion.div>
       <div className="flex-grow flex flex-col overflow-hidden">
-        <header className="bg-white border-b border-gray-200 p-4">
-          <h1 className="text-xl text-black font-semibold">
-            {sidebarItems.find((item) => item.path === location.pathname)
-              ?.label || "Dashboard"}
-          </h1>
-        </header>
+        {location.pathname !== "/dashboard/test" && (
+          <header className="bg-white border-b border-gray-200 p-4">
+            <h1 className="text-xl text-black font-semibold">
+              {sidebarItems.find((item) => item.path === location.pathname)
+                ?.label || "Dashboard"}
+            </h1>
+          </header>
+        )}
         <main className="flex-grow overflow-auto">
           <Outlet />
         </main>

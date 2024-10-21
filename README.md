@@ -30,3 +30,5 @@
 - may be store ai config in session storage
 - use context sent req 3 times when logged in - fix it
 -->
+
+https://claude.ai/chat/a0471a9b-104b-4e97-8d96-e6df9b5f3de6

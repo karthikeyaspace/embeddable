@@ -5,43 +5,48 @@ import ChatbotPreview from "../components/ChatbotPreview";
 import api from "../utils/axios";
 import Button from "../components/Button";
 import { useUser } from "../context/UserContext";
-import { PlusCircle } from "lucide-react";
+import { Loader2, PlusCircle, X } from "lucide-react";
 import t from "../components/Toast";
 
 const CreateChatbot: React.FC = () => {
   const [step, setStep] = useState(0);
   const { chatbotConfig, userId, fetchChatbot } = useUser();
-  const [config, setConfig] = useState<ChatbotConfig>(
-    chatbotConfig ||
-      JSON.parse(localStorage.getItem("embeddable.config")!) || {
-        chatbot_id: "",
-        logo_url: "",
-        image_url: "",
-        user_name: "",
-        website_url: "",
-        chatbot_type: "personal",
-        home_message: "",
-        description: "",
-        contact_link: "",
-        greeting_message: "",
-        error_response: "",
-        default_questions: ["", "", ""],
-        ai_configuration: [{ user_question: "", ai_response: "" }],
-      }
-  );
+  const [loading, setLoading] = useState(true);
+  const [showScript, setShowScript] = useState(false);
+  const [config, setConfig] = useState<ChatbotConfig>({
+    chatbot_id: "",
+    logo_url: "",
+    image_url: "",
+    user_name: "",
+    website_url: "",
+    chatbot_type: "personal",
+    home_message: "",
+    description: "",
+    contact_link: "",
+    greeting_message: "",
+    error_response: "",
+    default_questions: ["", "", ""],
+    ai_configuration: [{ user_question: "", ai_response: "" }],
+  });
 
   useEffect(() => {
-    if (chatbotConfig) {
-      setConfig(chatbotConfig);
-    } else {
-      fetchChatbot().then((config) => {
-        if (config) {
-          setConfig(config);
+    const initializeConfig = async () => {
+      if (chatbotConfig) {
+        setConfig(chatbotConfig);
+      } else if (localStorage.getItem("embeddable.config")) {
+        setConfig(JSON.parse(localStorage.getItem("embeddable.config")!));
+      } else {
+        const fetchedConfig = await fetchChatbot();
+        if (fetchedConfig) {
+          setConfig(fetchedConfig);
         }
-      });
-    }
+      }
+      setLoading(false);
+    };
+
+    initializeConfig();
   }, []);
-  localStorage.removeItem("embeddable.config");
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -55,13 +60,11 @@ const CreateChatbot: React.FC = () => {
       const res = await api.post("/makebot", config);
       t(res.data.message, res.data.success ? "success" : "error");
       if (res.data.success) {
-        if(res.data.message === "Chatbot created successfully") {
-          
-        } 
-        localStorage.setItem("embeddable.config", JSON.stringify(config));
+        setShowScript(true);
       }
     } catch (err) {
       console.log(err);
+      t("An error occurred", "error");
     }
   };
   const steps = [
@@ -100,6 +103,7 @@ const CreateChatbot: React.FC = () => {
             {["personal", "business"].map((type) => (
               <button
                 key={type}
+                type="button"
                 onClick={() =>
                   setConfig((prev) => ({
                     ...prev,
@@ -321,89 +325,142 @@ const CreateChatbot: React.FC = () => {
     }
   };
 
-  return (
-    <div className="flex w-full relative h-full">
-      <div className="w-2/3 overflow-auto small-scrollbar p-6">
-        <div className="mb-8">
-          <div className="flex justify-between items-center">
-            {steps.map((_, index) => (
-              <React.Fragment key={index}>
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    step >= index
-                      ? "bg-black text-white"
-                      : "bg-gray-200 text-gray-600"
-                  }`}
-                >
-                  {index + 1}
-                </div>
-                {index < steps.length - 1 && (
-                  <div className="flex-1 h-1 mx-2 bg-gray-200">
-                    <div
-                      className="h-full bg-black transition-all duration-300 ease-in-out"
-                      style={{ width: step > index ? "100%" : "0%" }}
-                    ></div>
+  if (loading)
+    return (
+      <div className="h-screen flex justify-center items-center">
+        <Loader2 size={25} className="animate-spin" />
+      </div>
+    );
+  else
+    return (
+      <div className="flex w-full relative h-full">
+        <div className="w-2/3 overflow-auto small-scrollbar p-6">
+          <div className="mb-8">
+            <div className="flex justify-between items-center">
+              {steps.map((_, index) => (
+                <React.Fragment key={index}>
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      step >= index
+                        ? "bg-black text-white"
+                        : "bg-gray-200 text-gray-600"
+                    }`}
+                  >
+                    {index + 1}
                   </div>
-                )}
-              </React.Fragment>
-            ))}
+                  {index < steps.length - 1 && (
+                    <div className="flex-1 h-1 mx-2 bg-gray-200">
+                      <div
+                        className="h-full bg-black transition-all duration-300 ease-in-out"
+                        style={{ width: step > index ? "100%" : "0%" }}
+                      ></div>
+                    </div>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+            <div className="flex justify-between mt-2 text-sm text-gray-600">
+              {steps.map((s, index) => (
+                <span key={index} className="text-center">
+                  {s.title}
+                </span>
+              ))}
+            </div>
           </div>
-          <div className="flex justify-between mt-2 text-sm text-gray-600">
-            {steps.map((s, index) => (
-              <span key={index} className="text-center">
-                {s.title}
-              </span>
-            ))}
-          </div>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={step}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              {steps[step].fields.map((field) =>
-                renderField(field as keyof ChatbotConfig)
-              )}
-            </motion.div>
-          </AnimatePresence>
-          <div className="flex justify-between mt-8">
-            {step > 0 && (
-              <Button
-                type="button"
-                onClick={() => setStep((prev) => prev - 1)}
-                text="Back"
-                logo=""
-              />
-            )}
-            {step < steps.length - 1 ? (
-              <Button
-                type="button"
-                onClick={() => setStep((prev) => prev + 1)}
-                text="Next"
-                logo=""
-                class="ml-auto transition"
-              />
-            ) : (
-              <button
-                className="px-4 py-2 bg-black text-white ml-auto transition flex justify-center items-center rounded-md"
-                type="submit"
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={step}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
               >
-                <PlusCircle className="mr-2 w-4 h-4" />{" "}
-                {chatbotConfig ? "Update" : "Create"} Chatbot
-              </button>
-            )}
+                {steps[step].fields.map((field) =>
+                  renderField(field as keyof ChatbotConfig)
+                )}
+              </motion.div>
+            </AnimatePresence>
+            <div className="flex justify-between mt-8">
+              {step > 0 && (
+                <Button
+                  type="button"
+                  onClick={() => setStep((prev) => prev - 1)}
+                  text="Back"
+                  logo=""
+                />
+              )}
+              {step < steps.length - 1 ? (
+                <Button
+                  type="button"
+                  onClick={() => setStep((prev) => prev + 1)}
+                  text="Next"
+                  logo=""
+                  class="ml-auto transition"
+                />
+              ) : (
+                <button
+                  className="px-4 py-2 bg-black text-white ml-auto transition flex justify-center items-center rounded-md"
+                  type="submit"
+                >
+                  <PlusCircle className="mr-2 w-4 h-4" />{" "}
+                  {chatbotConfig ? "Update" : "Create"} Chatbot
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
+        <div className="fixed right-0 top-0 bottom-0 overflow-auto small-scrollbar border-l border-gray-500">
+          <ChatbotPreview config={config} />
+        </div>
+
+        {showScript && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <motion.div
+              className="bg-white p-6 rounded-lg shadow-lg border border-gray-200 max-w-md w-full mx-4"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.7 }}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Your Chatbot Script</h3>
+                <span
+                  onClick={() => {
+                    setShowScript(false);
+                  }}
+                  className="cursor-pointer"
+                >
+                  <X size={16} />
+                </span>
+              </div>
+              <div className="flex items-center mb-4">
+                <input
+                  type="text"
+                  readOnly
+                  value={`<script src="embeddable.vercel.app/chat" data-id="${config.chatbot_id}"></script>`}
+                  className="flex-grow mr-2 p-2  border rounded-md text-sm font-mono bg-gray-100"
+                />
+                <Button
+                  type="button"
+                  text="Copy"
+                  onClick={() => {
+                    navigator.clipboard.writeText(
+                      `<script src="embeddable.vercel.app/chat" data-id="${config.chatbot_id}"></script>`
+                    );
+                    t("Script copied to clipboard", "success");
+                  }}
+                  logo="Clipboard"
+                  class="whitespace-nowrap"
+                />
+              </div>
+              <p className="text-xs text-gray-600 italic">
+                Add this script to your website to embed the chatbot.
+              </p>
+            </motion.div>
           </div>
-        </form>
+        )}
       </div>
-      <div className="fixed right-0 top-0 bottom-0 overflow-auto small-scrollbar border-l border-gray-500">
-        <ChatbotPreview config={config} />
-      </div>
-    </div>
-  );
+    );
 };
 
 export default CreateChatbot;

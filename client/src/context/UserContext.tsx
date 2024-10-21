@@ -13,27 +13,11 @@ interface User {
   userId: string;
   status: "authenticated" | "unauthenticated" | "loading";
   chatbotConfig: ChatbotConfig | null;
-  setChatbotConfig: React.Dispatch<React.SetStateAction<ChatbotConfig | null>>;
   login: (username: string, password: string) => Promise<boolean>;
   register: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
   fetchChatbot: () => Promise<ChatbotConfig | null>;
 }
-
-const defaultConfig: ChatbotConfig = {
-  logo_url: "",
-  image_url: "",
-  user_name: "",
-  website_url: "",
-  chatbot_type: "personal",
-  home_message: "",
-  description: "",
-  contact_link: "",
-  greeting_message: "",
-  error_response: "",
-  default_questions: ["", "", ""],
-  ai_configuration: [{ user_question: "", ai_response: "" }],
-};
 
 const UserContext = createContext<User | undefined>(undefined);
 
@@ -59,8 +43,6 @@ const UserProvier = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (status === "authenticated") fetchChatbot();
   }, [status, userId]);
-
-  console.log(chatbotConfig);
 
   const fetchChatbot = async () => {
     if (!userId) {
@@ -95,7 +77,7 @@ const UserProvier = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       const res = await api.post("/login", { email, password });
-      console.log(res.data)
+      console.log(res.data);
       if (res.data.success) {
         setUserId(res.data.userId);
         setStatus("authenticated");
@@ -151,7 +133,6 @@ const UserProvier = ({ children }: { children: ReactNode }) => {
         userId,
         status,
         chatbotConfig,
-        setChatbotConfig,
         login,
         register,
         logout,

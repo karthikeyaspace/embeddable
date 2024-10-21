@@ -63,3 +63,5 @@ class ChatbotController:
     async def chatai(chat: ChatbotModels.ChatRequest):
         response = chatbot(chat)
         return {"success": True, "response": response}
+
+

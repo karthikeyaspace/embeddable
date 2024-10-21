@@ -31,9 +31,11 @@ async def root():
 
 # merge
 
+
 @app.post("/login")
 async def login(request: UserModels.LoginRequest):
     return await UserController.login(request)
+
 
 @app.post("/register")
 async def register(request: UserModels.CreateUserRequest):
@@ -52,7 +54,7 @@ async def makebot(request: ChatbotModels.CreateChatbot):
 
 # after embedding routes
 
-@app.post("/embedchatbot")
+@app.post("/embedbot")
 async def get_chatbot_details(request: ChatbotModels.GetChatbotDetailsRequest):
     return await ChatbotController.get_chatbot(request.chatbot_id)
 
@@ -64,7 +66,7 @@ async def chat(request: ChatbotModels.ChatRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="localhost", port=8001)
+    uvicorn.run(app, host="localhost", port=8000)
 
 
 # uvicorn server:app --reload

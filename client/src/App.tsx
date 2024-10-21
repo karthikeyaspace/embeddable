@@ -7,8 +7,10 @@ import Chatbot from "./components/Chatbot";
 import CreateChatbot from "./pages/CreateChatbot";
 import Providers from "./context/Providers";
 import Dashboard from "./pages/Dashboard";
+import Test from "./pages/Test";
 
 import { Toaster } from "react-hot-toast";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const App: React.FC = () => {
   return (
@@ -17,11 +19,11 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<Layout />}>
+          <Route path="/dashboard" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
             <Route index element={<Dashboard />} />
             <Route path="create" element={<CreateChatbot />} />
             <Route path="analytics" element={<h1>Coming Soon</h1>} />
-            <Route path="test" element={<h1>All Chatbots</h1>} />
+            <Route path="test" element={<Test />} />
             <Route path="settings" element={<h1>Settings</h1>} />
             <Route path="*" element={<h1>Not Found</h1>} />
           </Route>

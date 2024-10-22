@@ -14,7 +14,13 @@ const Chatbot: React.FC = () => {
   const { id: chatbotId } = useParams<{ id: string }>();
   const [messages, setMessages] = useState<
     { content: string; isUser: boolean }[]
-  >([]);
+  >(() => {
+    const storeMessages = localStorage.getItem("embeddable.messages");
+    if (storeMessages) {
+      return JSON.parse(storeMessages);
+    }
+    return [];
+  });
   const [input, setInput] = useState("");
   const [config, setConfig] = useState<ChatbotConfig | null>(null);
   const [activeTab, setActiveTab] = useState<"home" | "chat">("home");
@@ -57,10 +63,10 @@ const Chatbot: React.FC = () => {
 
   const sendChatMessage = async (message: string) => {
     if (!config) return;
-    try {
-      setMessages((prev) => [...prev, { content: message, isUser: true }]);
-      setInput("");
+    setMessages((prev) => [...prev, { content: message, isUser: true }]);
+    setInput("");
 
+    try {
       const res = await api.post("/chat", {
         chatbot_id: chatbotId,
         user_message: message,
@@ -73,8 +79,8 @@ const Chatbot: React.FC = () => {
           { content: res.data.response, isUser: false },
         ]);
       }
+      localStorage.setItem("embeddable.messages", JSON.stringify(messages));  
     } catch (error) {
-      console.error("Error sending chat message:", error);
       setMessages((prev) => [
         ...prev,
         { content: config.error_response, isUser: false },
@@ -267,7 +273,7 @@ const Chatbot: React.FC = () => {
             </AnimatePresence>
           </div>
 
-          <div className="h-8 text-sm text-gray-500 flex justify-center items-center bg-gray-50">
+          <div className="h-8 text-sm text-gray-400 flex justify-center items-center bg-gray-100">
             powered by embeddable
           </div>
         </div>

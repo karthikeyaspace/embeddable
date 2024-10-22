@@ -125,6 +125,7 @@ const UserProvier = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem("embeddable.token");
     localStorage.removeItem("embeddable.userId");
     localStorage.removeItem("embeddable.config");
+    localStorage.removeItem("embeddable.embedconfig");
   };
 
   return (

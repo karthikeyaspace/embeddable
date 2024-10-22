@@ -1,6 +1,7 @@
 <!-- docker run -d -e POSTGRES_DB=embed -e POSTGRES_PASSWORD=embed -e POSTGRES_USER=embed -p 6500:5432 postgres:latest -->
 
 # On Progress - Building
+
 ### embeddable
 
 ### What more can be done
@@ -20,15 +21,14 @@
 - Firebase, Langchain
 
 <!--
-- centralize .env
 
 - reduce number of backend routes - /, /login, /getbot, /makebot - create and edit, /embedbot, /chat
 - do if else for all the api calls
-- perform validation in frontend and backend 
+- perform validation in frontend and backend
 - after finishing - optimize the code - reduce db calls etc
 - try storing prev messages, ai config, description in localstorage
-- may be store ai config in session storage
 - use context sent req 3 times when logged in - fix it
+- localstorage data for authentication  - token, expiresAt, email, emailverified
 -->
 
 https://claude.ai/chat/a0471a9b-104b-4e97-8d96-e6df9b5f3de6

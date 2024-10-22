@@ -1,7 +1,7 @@
 const env = {
-  API_URL: import.meta.env.VITE_API_URL as string,
+  API_URL: import.meta.env.MODE === "development" ? "http://127.0.0.1:8000" : "https://embedapi.itskv.me",
   NODE_ENV: import.meta.env.MODE as string,
-  BASE_URL: import.meta.env.VITE_BASE_URL || "http://localhost:5173",
+  BASE_URL: import.meta.env.MODE === "development" ? "http://localhost:5173" : "https://embed.itskv.me",
 };
 
 export default env;

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { ChatbotConfig } from "../utils/types";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -9,18 +9,7 @@ import {
 } from "lucide-react";
 
 const ChatbotPreview: React.FC<{ config: ChatbotConfig }> = ({ config }) => {
-  const [messages, setMessages] = useState<
-    { content: string; isUser: boolean }[]
-  >([]);
   const [activeTab, setActiveTab] = useState<"home" | "chat">("home");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages]);
-
   return (
     <div className="bg-gray-200">
       <div className="w-full sm:w-[400px] h-screen mx-auto bg-white flex flex-col">
@@ -141,53 +130,7 @@ const ChatbotPreview: React.FC<{ config: ChatbotConfig }> = ({ config }) => {
                   <p className="my-4 inline-block p-2 rounded-lg max-w-[80%] bg-blue-100 text-gray-800">
                     {config.greeting_message}
                   </p>
-                  {messages.length === 0 && (
-                    <div className="mb-4">
-                      <div className="grid grid-cols-2 gap-3">
-                        {config.default_questions?.map((question, index) => (
-                          <button
-                            key={index}
-                            className="cursor-pointer bg-blue-50 text-blue-600 p-3 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium shadow-sm border border-blue-100 flex items-center justify-center text-center h-full"
-                            onClick={() =>
-                              setMessages((prev) => [
-                                ...prev,
-                                {
-                                  content: config.error_response,
-                                  isUser: false,
-                                },
-                              ])
-                            }
-                          >
-                            {question}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  <div className="space-y-4">
-                    {messages.map((msg, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: index * 0.1 }}
-                        className={`flex ${
-                          msg.isUser ? "justify-end" : "justify-start"
-                        }`}
-                      >
-                        <span
-                          className={`inline-block p-2 rounded-lg max-w-[80%] ${
-                            msg.isUser
-                              ? "bg-blue-600 text-white"
-                              : "bg-blue-100 text-gray-800"
-                          }`}
-                        >
-                          {msg.content}
-                        </span>
-                      </motion.div>
-                    ))}
-                  </div>
-                  <div ref={messagesEndRef} />
+                  <div className="space-y-4"></div>
                 </div>
                 <form className="p-4 bg-white flex">
                   <input

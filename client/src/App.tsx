@@ -11,6 +11,7 @@ import Test from "./pages/Test";
 
 import { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Verify from "./pages/Verify";
 
 const App: React.FC = () => {
   return (
@@ -27,6 +28,7 @@ const App: React.FC = () => {
             <Route path="settings" element={<h1>Settings</h1>} />
             <Route path="*" element={<h1>Not Found</h1>} />
           </Route>
+          <Route path="/verify" element={<Verify />}/>
           <Route path="/chat" element={<Chatbot />} />
           <Route path="/chat/:id" element={<Chatbot />} />
         </Routes>

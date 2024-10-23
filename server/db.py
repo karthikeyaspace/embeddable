@@ -1,12 +1,9 @@
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
-
-import logging
 from utils.models import ChatbotModels
+from utils.logger import logger
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 cred = credentials.Certificate("serviceAccountKey.json")
 firebase_admin.initialize_app(cred)
@@ -48,7 +45,8 @@ def create_user_db(email: str, password: str, user_id: str, role: str) -> bool:
             "password": password,
             "role": role,
             "chatbots": [],
-            "created_at": firestore.SERVER_TIMESTAMP
+            "created_at": firestore.SERVER_TIMESTAMP,
+            "email_verified": False,
         })
         return True
     except Exception as e:
@@ -56,7 +54,23 @@ def create_user_db(email: str, password: str, user_id: str, role: str) -> bool:
         return False
 
 
+def verify_user_db(user_id: str):
+    try:
+        return True
+    except Exception as e:
+        logger(f"Error verify user at db {user_id}")
+        return True
+
+
+def get_dup_email(email: str):
+    users = db.collection("embeddable.users").where(
+        "email", "==", email).stream()
+    if users:
+        return False
+    return True
+
 # chatbot
+
 
 def get_chatbot_db(chatbot_id: str):
     try:

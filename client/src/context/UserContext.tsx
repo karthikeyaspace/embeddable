@@ -102,10 +102,8 @@ const UserProvier = ({ children }: { children: ReactNode }) => {
     try {
       const res = await api.post("/register", { email, password });
       if (res.data.success) {
-        setUserId(res.data.userId);
-        setStatus("authenticated");
-        localStorage.setItem("embeddable.token", res.data.token);
-        localStorage.setItem("embeddable.userId", res.data.userId);
+        
+
         return true;
       } else {
         setStatus("unauthenticated");

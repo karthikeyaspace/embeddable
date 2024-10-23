@@ -42,6 +42,11 @@ async def register(request: UserModels.CreateUserRequest):
     return await UserController.create_user(request)
 
 
+@app.post("/verify/{token}")
+async def verify_user(token: str):
+    return await UserController.verify_user(token)
+
+
 @app.post("/getbot")
 async def get_chatbot(request: ChatbotModels.GetChatbotRequest):
     return await ChatbotController.get_users_chatbot(request.user_id)

@@ -29,8 +29,8 @@ logger = logging.getLogger(__name__)
 async def root():
     return "Embeddable AI"
 
-# merge
 
+# authentication
 
 @app.post("/login")
 async def login(request: UserModels.LoginRequest):
@@ -45,6 +45,11 @@ async def register(request: UserModels.CreateUserRequest):
 @app.post("/verify/{token}")
 async def verify_user(token: str):
     return await UserController.verify_user(token)
+
+
+@app.post("/resend-verification")
+async def resend_verification(request: UserModels.ResendVerificationRequest):
+    return await UserController.resend_verification(request)
 
 
 @app.post("/getbot")
@@ -71,7 +76,7 @@ async def chat(request: ChatbotModels.ChatRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="localhost", port=8000)
+    uvicorn.run(app, host="localhost", port=8001)
 
 
 # uvicorn server:app --reload

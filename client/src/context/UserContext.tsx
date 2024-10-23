@@ -13,8 +13,14 @@ interface User {
   userId: string;
   status: "authenticated" | "unauthenticated" | "loading";
   chatbotConfig: ChatbotConfig | null;
-  login: (username: string, password: string) => Promise<boolean>;
-  register: (username: string, password: string) => Promise<boolean>;
+  login: (
+    username: string,
+    password: string
+  ) => Promise<{ success: boolean; message: string }>;
+  register: (
+    username: string,
+    password: string
+  ) => Promise<{ success: boolean; message: string }>;
   logout: () => void;
   fetchChatbot: () => Promise<ChatbotConfig | null>;
 }
@@ -31,13 +37,31 @@ const UserProvier = ({ children }: { children: ReactNode }) => {
   );
 
   useEffect(() => {
-    const token = localStorage.getItem("embeddable.token");
-    const userId = localStorage.getItem("embeddable.userId");
+    const checkAuth = () => {
+      const token = localStorage.getItem("embeddable.token");
+      const storedUserId = localStorage.getItem("embeddable.userId");
 
-    if (token && userId) {
-      setUserId(userId);
-      setStatus("authenticated");
-    } else setStatus("unauthenticated");
+      if (token && storedUserId) {
+        try {
+          const tokenData = JSON.parse(atob(token.split(".")[1]));
+          const expirationTime = tokenData.exp * 1000; // Convert to milliseconds
+
+          if (Date.now() >= expirationTime) {
+            logout();
+          } else {
+            setUserId(storedUserId);
+            setStatus("authenticated");
+          }
+        } catch (error) {
+          console.error("Error parsing token:", error);
+          logout();
+        }
+      } else {
+        setStatus("unauthenticated");
+      }
+    };
+
+    checkAuth();
   }, []);
 
   useEffect(() => {
@@ -74,45 +98,65 @@ const UserProvier = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (
+    email: string,
+    password: string
+  ): Promise<{ success: boolean; message: string }> => {
     try {
       const res = await api.post("/login", { email, password });
-      console.log(res.data);
-      if (res.data.success) {
-        setUserId(res.data.userId);
+
+      if (res.data.success && res.data.token && res.data.user_id) {
+        setUserId(res.data.user_id);
         setStatus("authenticated");
         localStorage.setItem("embeddable.token", res.data.token);
-        localStorage.setItem("embeddable.userId", res.data.userId);
-        return true;
-      } else {
-        setStatus("unauthenticated");
-        return false;
+        localStorage.setItem("embeddable.userId", res.data.user_id);
+        return {
+          success: true,
+          message: "Successfully logged in",
+        };
       }
+
+      setStatus("unauthenticated");
+      return {
+        success: false,
+        message: res.data.message || "Invalid credentials",
+      };
     } catch (error) {
       console.error("Login error:", error);
       setStatus("unauthenticated");
-      return false;
+      return {
+        success: false,
+        message: "An error occurred during login",
+      };
     }
   };
 
   const register = async (
     email: string,
     password: string
-  ): Promise<boolean> => {
+  ): Promise<{ success: boolean; message: string }> => {
     try {
       const res = await api.post("/register", { email, password });
-      if (res.data.success) {
-        
 
-        return true;
-      } else {
-        setStatus("unauthenticated");
-        return false;
+      if (res.data.success) {
+        return {
+          success: true,
+          message:
+            res.data.message ||
+            "Registration successful. Please verify your email.",
+        };
       }
+
+      return {
+        success: false,
+        message: res.data.message || "Registration failed",
+      };
     } catch (error) {
       console.error("Registration error:", error);
-      setStatus("unauthenticated");
-      return false;
+      return {
+        success: false,
+        message: "An error occurred during registration",
+      };
     }
   };
 
@@ -120,6 +164,10 @@ const UserProvier = ({ children }: { children: ReactNode }) => {
     setUserId("");
     setStatus("unauthenticated");
     setChatbotConfig(null);
+    clearLocalStorage();
+  };
+
+  const clearLocalStorage = () => {
     localStorage.removeItem("embeddable.token");
     localStorage.removeItem("embeddable.userId");
     localStorage.removeItem("embeddable.config");

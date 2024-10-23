@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./pages/Layout";
 import Landing from "./pages/Landing";
-import Login from "./pages/Login";
+import Auth from "./pages/Auth";
 import Chatbot from "./components/Chatbot";
 import CreateChatbot from "./pages/CreateChatbot";
 import Providers from "./context/Providers";
@@ -19,7 +19,7 @@ const App: React.FC = () => {
       <Router>
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
             <Route index element={<Dashboard />} />
             <Route path="create" element={<CreateChatbot />} />

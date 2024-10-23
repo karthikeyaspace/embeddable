@@ -2,8 +2,7 @@ import smtplib
 import ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from config import env
-
+from utils.config import env
 
 async def sendMail(token: str, email: str):
     sender_email = env['EMAIL_ID']

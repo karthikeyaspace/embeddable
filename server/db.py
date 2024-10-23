@@ -37,6 +37,19 @@ def get_user_db_login(email: str, password: str) -> dict | None:
         return None
 
 
+def get_user_by_email(email: str) -> dict | None:
+    try:
+        user = db.collection("embeddable.users").where(
+            "email", "==", email).stream()
+
+        for u in user:
+            return u.to_dict()
+        return None
+    except Exception as e:
+        logger.error(f"Error retrieving user by email: {e}")
+        return None
+
+
 def create_user_db(email: str, password: str, user_id: str, role: str) -> bool:
     try:
         db.collection("embeddable.users").document(user_id).set({
@@ -56,18 +69,22 @@ def create_user_db(email: str, password: str, user_id: str, role: str) -> bool:
 
 def verify_user_db(user_id: str):
     try:
+        db.collection("embeddable.users").document(user_id).update({
+            "email_verified": True,
+            "verified_at": firestore.SERVER_TIMESTAMP
+        })
         return True
     except Exception as e:
-        logger(f"Error verify user at db {user_id}")
-        return True
+        logger.error(f"Error verifying user in db: {e}")
+        return False
 
 
 def get_dup_email(email: str):
     users = db.collection("embeddable.users").where(
         "email", "==", email).stream()
-    if users:
-        return False
-    return True
+    for user in users:
+        return True
+    return False
 
 # chatbot
 

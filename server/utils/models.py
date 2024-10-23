@@ -14,6 +14,9 @@ class UserModels:
         email: str
         password: str
 
+    class ResendVerificationRequest(BaseModel):
+        email: str
+
 
 class ChatbotModels:
     class GetChatbotRequest(BaseModel):

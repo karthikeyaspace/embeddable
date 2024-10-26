@@ -3,11 +3,12 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import api from "../utils/axios";
 import t from "../components/Toast";
+import { setLs } from "../utils/localstorage";
 
 const Verify = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
-  const [verifying, setVerifying] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -15,36 +16,36 @@ const Verify = () => {
       const token = params.get("token");
       if (!token) {
         setError("Invalid token");
-        setVerifying(false);
+        setLoading(false);
         return;
       }
 
       try {
         const res = await api.post(`/verify/${token}`);
         if (res.data.success) {
-          // session data
-          localStorage.setItem("embeddable.token", res.data.token);
-          localStorage.setItem("embeddable.userId", res.data.user_id);
-          localStorage.setItem("embeddable.expiresAt", res.data.expires_at);
+          setLs("token", res.data.token);
+          setLs("user_id", res.data.user_id);
+          setLs("expires_at", res.data.expires_at);
 
           t("Email verified successfully", "success");
           navigate("/dashboard");
         } else {
+          t(res.data.message || "Verification failed", "error");
           setError(res.data.message || "Verification failed");
-          setVerifying(false);
+          setLoading(false);
         }
       } catch (err) {
-        setVerifying(false);
+        setLoading(false);
         return;
       } finally {
-        setVerifying(false);
+        setLoading(false);
       }
     };
 
     verify();
   }, [navigate, params]);
 
-  if (verifying) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

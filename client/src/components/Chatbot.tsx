@@ -79,7 +79,7 @@ const Chatbot: React.FC = () => {
           { content: res.data.response, isUser: false },
         ]);
       }
-      localStorage.setItem("embeddable.messages", JSON.stringify(messages));  
+      localStorage.setItem("embeddable.messages", JSON.stringify(messages));
     } catch (error) {
       setMessages((prev) => [
         ...prev,

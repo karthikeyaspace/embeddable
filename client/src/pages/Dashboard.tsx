@@ -9,11 +9,11 @@ import env from "../utils/env";
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const { chatbotConfig, fetchChatbot } = useUser();
+  const { chatbotConfig, fetchChatbot, status } = useUser();
 
   useEffect(() => {
     const asyncFetch = async () => {
-      await fetchChatbot();
+      if (status === "authenticated") await fetchChatbot();
       setLoading(false);
     };
     asyncFetch();

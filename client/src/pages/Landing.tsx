@@ -1,18 +1,30 @@
 import { motion } from "framer-motion";
 import { MessageCircle, Code, Globe } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 
-export default function Landing() {
+const Landing = () => {
+  const { status } = useUser();
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (status === "authenticated") {
+      navigate("/dashboard");
+    } else {
+      navigate("/auth");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 text-white">
       <nav className="container mx-auto p-6 flex justify-between items-center">
         <h1 className="text-2xl font-bold">Embeddable</h1>
-        <Link
-          to={"/dashboard"}
+        <button
+          onClick={handleClick}
           className="bg-white text-blue-500 px-4 py-2 rounded-full hover:bg-opacity-90 transition"
         >
           Dashboard
-        </Link>
+        </button>
       </nav>
 
       <main className="container mx-auto px-6 py-12">
@@ -28,12 +40,12 @@ export default function Landing() {
           <p className="text-xl mb-8">
             Engage your visitors with intelligent conversations, powered by AI
           </p>
-          <Link
-            to={"/dashboard"}
+          <button
+            onClick={handleClick}
             className="bg-white text-blue-500 px-8 py-3 rounded-full text-lg font-semibold hover:bg-opacity-90 transition"
           >
             Get Started
-          </Link>
+          </button>
         </motion.div>
 
         <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-12">
@@ -73,4 +85,6 @@ export default function Landing() {
       </main>
     </div>
   );
-}
+};
+
+export default Landing;

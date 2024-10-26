@@ -8,6 +8,7 @@ import {
 import { ChatbotConfig } from "../utils/types";
 import api from "../utils/axios";
 import t from "../components/Toast";
+import { getLs, setLs } from "../utils/localstorage";
 
 interface User {
   userId: string;
@@ -38,13 +39,14 @@ const UserProvier = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const checkAuth = () => {
-      const token = localStorage.getItem("embeddable.token");
-      const storedUserId = localStorage.getItem("embeddable.userId");
+      const token = getLs("token");
+      const storedUserId = getLs("user_id");
+      const expiresAt = getLs("expires_at");
 
       if (token && storedUserId) {
         try {
           const tokenData = JSON.parse(atob(token.split(".")[1]));
-          const expirationTime = tokenData.exp * 1000; // Convert to milliseconds
+          const expirationTime = tokenData.exp * 1000;
 
           if (Date.now() >= expirationTime) {
             logout();
@@ -63,10 +65,7 @@ const UserProvier = ({ children }: { children: ReactNode }) => {
 
     checkAuth();
   }, []);
-
-  useEffect(() => {
-    if (status === "authenticated") fetchChatbot();
-  }, [status, userId]);
+  
 
   const fetchChatbot = async () => {
     if (!userId) {
@@ -98,65 +97,49 @@ const UserProvier = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const login = async (
-    email: string,
-    password: string
-  ): Promise<{ success: boolean; message: string }> => {
+  const login = async (email: string, password: string): Promise<any> => {
     try {
       const res = await api.post("/login", { email, password });
 
-      if (res.data.success && res.data.token && res.data.user_id) {
+      if (res.data.success) {
         setUserId(res.data.user_id);
         setStatus("authenticated");
-        localStorage.setItem("embeddable.token", res.data.token);
-        localStorage.setItem("embeddable.userId", res.data.user_id);
-        return {
-          success: true,
-          message: "Successfully logged in",
-        };
-      }
 
+        setLs("token", res.data.token);
+        setLs("user_id", res.data.user_id);
+        setLs("expires_at", res.data.expires_at);
+
+        t("Login successful!", "success");
+        return;
+      }
       setStatus("unauthenticated");
-      return {
-        success: false,
-        message: res.data.message || "Invalid credentials",
-      };
+
+      if (res.data.message === "Email not verified") {
+        resendVerification(email);
+        t("Email not verified, New email sent", "error");
+        return;
+      }
+      t(res.data.message || "Login failed", "error");
     } catch (error) {
       console.error("Login error:", error);
       setStatus("unauthenticated");
-      return {
-        success: false,
-        message: "An error occurred during login",
-      };
+      return;
     }
   };
 
-  const register = async (
-    email: string,
-    password: string
-  ): Promise<{ success: boolean; message: string }> => {
+  const register = async (email: string, password: string): Promise<any> => {
     try {
       const res = await api.post("/register", { email, password });
 
       if (res.data.success) {
-        return {
-          success: true,
-          message:
-            res.data.message ||
-            "Registration successful. Please verify your email.",
-        };
+        t("Registration successful! Please verify your email.", "success");
+        return;
       }
-
-      return {
-        success: false,
-        message: res.data.message || "Registration failed",
-      };
+      t(res.data.message || "Registration failed", "error");
+      return;
     } catch (error) {
       console.error("Registration error:", error);
-      return {
-        success: false,
-        message: "An error occurred during registration",
-      };
+      return;
     }
   };
 
@@ -167,9 +150,27 @@ const UserProvier = ({ children }: { children: ReactNode }) => {
     clearLocalStorage();
   };
 
+  const resendVerification = async (email: string) => {
+    try {
+      const response = await api.post("/resend-verification", { email });
+      if (response.data.success) {
+        t("New verification email sent!", "success");
+      } else {
+        t(
+          response.data.message || "Failed to resend verification email",
+          "error"
+        );
+      }
+    } catch (error) {
+      t("Failed to resend verification email", "error");
+    } finally {
+    }
+  };
+
   const clearLocalStorage = () => {
     localStorage.removeItem("embeddable.token");
-    localStorage.removeItem("embeddable.userId");
+    localStorage.removeItem("embeddable.user_id");
+    localStorage.removeItem("embeddable.expires_at");
     localStorage.removeItem("embeddable.config");
     localStorage.removeItem("embeddable.embedconfig");
   };

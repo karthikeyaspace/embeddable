@@ -7,6 +7,7 @@ import Button from "../components/Button";
 import { useUser } from "../context/UserContext";
 import { Loader2, PlusCircle, X } from "lucide-react";
 import t from "../components/Toast";
+import env from "../utils/env";
 
 const CreateChatbot: React.FC = () => {
   const [step, setStep] = useState(0);
@@ -60,6 +61,10 @@ const CreateChatbot: React.FC = () => {
       const res = await api.post("/makebot", config);
       t(res.data.message, res.data.success ? "success" : "error");
       if (res.data.success) {
+        const chatbot_id = res.data.chatbot_id;
+        config.chatbot_id = chatbot_id;
+        localStorage.setItem("embeddable.config", JSON.stringify(config));
+        setConfig((prev) => ({ ...prev, chatbot_id }));
         setShowScript(true);
       }
     } catch (err) {
@@ -437,7 +442,7 @@ const CreateChatbot: React.FC = () => {
                 <input
                   type="text"
                   readOnly
-                  value={`<script src="embeddable.vercel.app/chat" data-id="${config.chatbot_id}"></script>`}
+                  value={`<script src="${env.BASE_URL}/chat" data-id="${config.chatbot_id}"></script>`}
                   className="flex-grow mr-2 p-2  border rounded-md text-sm font-mono bg-gray-100"
                 />
                 <Button
@@ -445,7 +450,7 @@ const CreateChatbot: React.FC = () => {
                   text="Copy"
                   onClick={() => {
                     navigator.clipboard.writeText(
-                      `<script src="embeddable.vercel.app/chat" data-id="${config.chatbot_id}"></script>`
+                      `<script src="${env.BASE_URL}/chat" data-id="${config.chatbot_id}"></script>`
                     );
                     t("Script copied to clipboard", "success");
                   }}

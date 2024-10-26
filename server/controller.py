@@ -47,7 +47,7 @@ class UserController:
                 "success": True,
                 "user_id": userdb['user_id'],
                 "token": token,
-                "expires_at": expires_at
+                "expires_at": expires_at.timestamp()
             }
 
         except Exception as e:
@@ -62,10 +62,7 @@ class UserController:
 
             user_id = str(uuid4())
 
-            # token expiration
-            expires_at = datetime.now(timezone.utc) + VERIFICATION_EXPIRY
-
-            verification_token = await UserController._gen_verification_token(user_id)
+            verification_token = await UserController.gen_verification_token(user_id)
 
             result = create_user_db(
                 email=user.email,
@@ -116,7 +113,10 @@ class UserController:
                     "expires_at": datetime.now(timezone.utc) + SESSION_EXPIRY
                 }
             return {"success": False, "message": "Failed to verify email"}
-
+        except jwt.ExpiredSignatureError:
+            return {"success": False, "message": "Verification link has expired"}
+        except jwt.InvalidTokenError:
+            return {"success": False, "message": "Invalid verification link"}
         except Exception as e:
             logger.error(f"Error verifying user: {e}")
             return {"success": False, "message": "Verification failed"}
@@ -131,7 +131,7 @@ class UserController:
             if user.get("email_verified", False):
                 return {"success": False, "message": "Email already verified"}
 
-            verification_token = await UserController._gen_verification_token(user["user_id"])
+            verification_token = await UserController.gen_verification_token(user["user_id"])
             await sendMail(verification_token, email=request.email)
 
             return {"success": True, "message": f"New verification token sent to {request.email}"}
@@ -141,7 +141,7 @@ class UserController:
             return {"success": False, "message": "Failed to resend verification"}
 
     @staticmethod
-    async def _gen_verification_token(user_id: str) -> str:
+    async def gen_verification_token(user_id: str) -> str:
         expires_at = datetime.now(timezone.utc) + VERIFICATION_EXPIRY
         token = jwt.encode({
             "user_id": user_id,
@@ -165,7 +165,7 @@ class ChatbotController:
         print("user", user_chatbot)
         if user_chatbot:
             result = edit_chatbot_db(chatbot, user_chatbot['chatbot_id'])
-            return {"success": result, "message": "Chatbot edited successfully" if result else "Failed to edit chatbot"}
+            return {"success": result, "message": "Chatbot edited successfully" if result else "Failed to edit chatbot", "chatbot_id": user_chatbot['chatbot_id']}
         result = create_chatbot_db(chatbot)
         if result:
             chatbot_id = result

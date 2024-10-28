@@ -20,7 +20,14 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />
-          <Route path="/dashboard" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<Dashboard />} />
             <Route path="create" element={<CreateChatbot />} />
             <Route path="analytics" element={<h1>Coming Soon</h1>} />
@@ -28,7 +35,7 @@ const App: React.FC = () => {
             <Route path="settings" element={<h1>Settings</h1>} />
             <Route path="*" element={<h1>Not Found</h1>} />
           </Route>
-          <Route path="/verify" element={<Verify />}/>
+          <Route path="/verify" element={<Verify />} />
           <Route path="/chat" element={<Chatbot />} />
           <Route path="/chat/:id" element={<Chatbot />} />
         </Routes>

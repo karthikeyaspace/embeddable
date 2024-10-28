@@ -55,6 +55,8 @@ def chatbot(chat: ChatbotModels.ChatRequest) -> str:
             Answer:
             """
         )
+        
+        print(prev_messages)
 
         chain = LLMChain(llm=llm, prompt=prompt_template)
         response = chain.invoke({

@@ -1,5 +1,5 @@
 from db import (
-    create_user_db, get_user_db, get_user_db_login, get_dup_email, verify_user_db, get_chatbot_db,
+    create_user_db, get_user_db, get_dup_email, verify_user_db, get_chatbot_db,
     edit_chatbot_db, create_chatbot_db, get_users_chatbots_db, get_user_by_email
 )
 from uuid import uuid4

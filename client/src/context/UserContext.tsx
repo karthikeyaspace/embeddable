@@ -13,6 +13,7 @@ import { getLs, setLs } from "../utils/localstorage";
 interface User {
   userId: string;
   status: "authenticated" | "unauthenticated" | "loading";
+  setStatus: React.Dispatch<React.SetStateAction<"authenticated" | "unauthenticated" | "loading">>;
   chatbotConfig: ChatbotConfig | null;
   login: (
     username: string,
@@ -40,18 +41,15 @@ const UserProvier = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const checkAuth = () => {
       const token = getLs("token");
-      const storedUserId = getLs("user_id");
-      const expiresAt = getLs("expires_at");
 
-      if (token && storedUserId) {
+      if (token) {
         try {
           const tokenData = JSON.parse(atob(token.split(".")[1]));
           const expirationTime = tokenData.exp * 1000;
-
           if (Date.now() >= expirationTime) {
             logout();
           } else {
-            setUserId(storedUserId);
+            setUserId(tokenData.user_id);
             setStatus("authenticated");
           }
         } catch (error) {
@@ -65,18 +63,17 @@ const UserProvier = ({ children }: { children: ReactNode }) => {
 
     checkAuth();
   }, []);
-  
 
   const fetchChatbot = async () => {
     if (!userId) {
       return null;
     }
-    const storeConfig = localStorage.getItem("embeddable.config");
-    if (storeConfig) {
-      const parsedConfig = JSON.parse(storeConfig);
-      setChatbotConfig(parsedConfig);
-      return parsedConfig;
-    }
+    // const storeConfig = localStorage.getItem("embeddable.config");
+    // if (storeConfig) {
+    //   const parsedConfig = JSON.parse(storeConfig);
+    //   setChatbotConfig(parsedConfig);
+    //   return parsedConfig;
+    // }
     try {
       const res = await api.post("/getbot", { user_id: userId });
       if (res.data.success) {
@@ -172,6 +169,7 @@ const UserProvier = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem("embeddable.user_id");
     localStorage.removeItem("embeddable.expires_at");
     localStorage.removeItem("embeddable.config");
+    localStorage.removeItem("embeddable.messages");
     localStorage.removeItem("embeddable.embedconfig");
   };
 
@@ -180,6 +178,7 @@ const UserProvier = ({ children }: { children: ReactNode }) => {
       value={{
         userId,
         status,
+        setStatus,
         chatbotConfig,
         login,
         register,

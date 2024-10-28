@@ -23,20 +23,6 @@ def get_user_db(user_id: str) -> dict | None:
 
 # merge
 
-
-def get_user_db_login(email: str, password: str) -> dict | None:
-    try:
-        user = db.collection("embeddable.users").where(
-            "email", "==", email).where("password", "==", password).stream()
-        for u in user:
-            return u.to_dict()
-        return None
-
-    except Exception as e:
-        logger.error(f"Error retrieving user: {e}")
-        return None
-
-
 def get_user_by_email(email: str) -> dict | None:
     try:
         user = db.collection("embeddable.users").where(

@@ -4,12 +4,14 @@ import { Loader2 } from "lucide-react";
 import api from "../utils/axios";
 import t from "../components/Toast";
 import { setLs } from "../utils/localstorage";
+import { useUser } from "../context/UserContext";
 
 const Verify = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const { setStatus } = useUser();
 
   useEffect(() => {
     const verify = async () => {
@@ -27,6 +29,7 @@ const Verify = () => {
           setLs("user_id", res.data.user_id);
           setLs("expires_at", res.data.expires_at);
 
+          setStatus("authenticated");
           t("Email verified successfully", "success");
           navigate("/dashboard");
         } else {

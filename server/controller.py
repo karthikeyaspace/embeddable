@@ -162,7 +162,6 @@ class ChatbotController:
     @staticmethod
     async def create_edit_chatbot(chatbot: ChatbotModels.CreateChatbot):
         user_chatbot = get_users_chatbots_db(chatbot.user_id)
-        print("user", user_chatbot)
         if user_chatbot:
             result = edit_chatbot_db(chatbot, user_chatbot['chatbot_id'])
             return {"success": result, "message": "Chatbot edited successfully" if result else "Failed to edit chatbot", "chatbot_id": user_chatbot['chatbot_id']}

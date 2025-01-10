@@ -3,16 +3,30 @@ import { MessageCircle, Code, Globe } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 
+const features = [
+  {
+    icon: MessageCircle,
+    title: "Intelligent Conversations",
+    description: "Our AI-powered chatbots understand context and provide relevant responses.",
+  },
+  {
+    icon: Code,
+    title: "Easy Integration",
+    description: "Embed your chatbot with a simple script or iframe on any website.",
+  },
+  {
+    icon: Globe,
+    title: "Customizable",
+    description: "Tailor your chatbot to match your brand and meet your specific needs.",
+  },
+];
+
 const Landing = () => {
   const { status } = useUser();
   const navigate = useNavigate();
 
   const handleClick = () => {
-    if (status === "authenticated") {
-      navigate("/dashboard");
-    } else {
-      navigate("/auth");
-    }
+    navigate(status === "authenticated" ? "/dashboard" : "/auth");
   };
 
   return (
@@ -49,32 +63,13 @@ const Landing = () => {
         </motion.div>
 
         <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-12">
-          {[
-            {
-              icon: MessageCircle,
-              title: "Intelligent Conversations",
-              description:
-                "Our AI-powered chatbots understand context and provide relevant responses.",
-            },
-            {
-              icon: Code,
-              title: "Easy Integration",
-              description:
-                "Embed your chatbot with a simple script or iframe on any website.",
-            },
-            {
-              icon: Globe,
-              title: "Customizable",
-              description:
-                "Tailor your chatbot to match your brand and meet your specific needs.",
-            },
-          ].map((feature, index) => (
+          {features.map((feature, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: index * 0.2 }}
-              className="bg-white bg-opacity-10 p-6 rounded-lg"
+              className="flex items-center flex-col text-center"
             >
               <feature.icon className="w-12 h-12 mb-4" />
               <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>

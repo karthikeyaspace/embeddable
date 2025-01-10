@@ -13,7 +13,7 @@ export interface ChatbotConfig {
   greeting_message: string;
   error_response: string;
   ai_configuration?: {
-    user_question: string; // what can the user ask?
-    ai_response: string; // what should the AI respond with?
+    user_question: string; 
+    ai_response: string;
   }[];
 }

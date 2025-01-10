@@ -5,21 +5,18 @@ import t from "../components/Toast";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 
 const Auth: React.FC = () => {
-  const [isLogin, setIsLogin] = useState<boolean>(true);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [showConfirmPassword, setShowConfirmPassword] =
-    useState<boolean>(false);
+  const [isLogin, setIsLogin] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { status, login, register } = useUser();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (status === "authenticated") {
-      navigate("/dashboard");
-    }
+    if (status === "authenticated") navigate("/dashboard");
   }, [status]);
 
   useEffect(() => {
@@ -35,15 +32,9 @@ const Auth: React.FC = () => {
       t("Please fill in all fields.", "error");
       return false;
     }
-    if (!isLogin) {
-      if (password.length < 8) {
-        t("Password must be at least 8 characters long.", "error");
-        return false;
-      }
-      if (password !== confirmPassword) {
-        t("Passwords do not match.", "error");
-        return false;
-      }
+    if (!isLogin && (password.length < 8 || password !== confirmPassword)) {
+      t(password.length < 8 ? "Password must be at least 8 characters long." : "Passwords do not match.", "error");
+      return false;
     }
     return true;
   };
@@ -52,28 +43,16 @@ const Auth: React.FC = () => {
     e.preventDefault();
     if (!validateForm()) return;
     setLoading(true);
-
     try {
-      if (isLogin) {
-        await login(email, password);
-      } else {
-        await register(email, password);
-      }
+      isLogin ? await login(email, password) : await register(email, password);
     } catch (error: any) {
-      const errorMessage =
-        error?.response?.data?.message ||
-        "An error occurred. Please try again.";
-      t(errorMessage, "error");
+      t(error?.response?.data?.message || "An error occurred. Please try again.", "error");
     } finally {
       setLoading(false);
       setEmail("");
       setPassword("");
       setConfirmPassword("");
     }
-  };
-
-  const toggleMode = () => {
-    setIsLogin(!isLogin);
   };
 
   if (status === "loading") {
@@ -83,6 +62,10 @@ const Auth: React.FC = () => {
       </div>
     );
   }
+
+  const toggleMode = () => {
+    setIsLogin(!isLogin);
+  };
 
   if (status == "unauthenticated")
     return (

@@ -12,15 +12,7 @@ import api from "../utils/axios";
 
 const Chatbot: React.FC = () => {
   const { id: chatbotId } = useParams<{ id: string }>();
-  const [messages, setMessages] = useState<
-    { content: string; isUser: boolean }[]
-  >(() => {
-    const storeMessages = localStorage.getItem("embeddable.messages");
-    if (storeMessages) {
-      return JSON.parse(storeMessages);
-    }
-    return [];
-  });
+  const [messages, setMessages] = useState<{ content: string; isUser: boolean }[]>([]);
   const [input, setInput] = useState("");
   const [config, setConfig] = useState<ChatbotConfig | null>(null);
   const [activeTab, setActiveTab] = useState<"home" | "chat">("home");
@@ -38,23 +30,11 @@ const Chatbot: React.FC = () => {
 
   const fetchChatbotConfig = async () => {
     if (!chatbotId) return;
-
-    const storeConfig = localStorage.getItem("embeddable.embedconfig");
-    if (storeConfig) {
-      const config = JSON.parse(storeConfig);
-      setConfig(config);
-      return;
-    }
-
     try {
       const res = await api.post("/embedbot", { chatbot_id: chatbotId });
       if (res.data.success) {
         const fetchConfig = res.data.chatbot;
         setConfig(fetchConfig);
-        localStorage.setItem(
-          "embeddable.embedconfig",
-          JSON.stringify(fetchConfig)
-        );
       }
     } catch (error) {
       console.error("Error fetching chatbot config:", error);
@@ -79,7 +59,6 @@ const Chatbot: React.FC = () => {
           { content: res.data.response, isUser: false },
         ]);
       }
-      localStorage.setItem("embeddable.messages", JSON.stringify(messages));
     } catch (error) {
       setMessages((prev) => [
         ...prev,
@@ -118,11 +97,13 @@ const Chatbot: React.FC = () => {
                           src={config?.logo_url}
                           alt="Logo"
                           className="w-10 h-10"
+                          draggable={false}
                         />
                         <img
                           src={config?.image_url}
                           alt="User"
                           className="w-10 h-10 rounded-full"
+                          draggable={false}
                         />
                       </div>
                       <div className="flex-grow mt-10 space-y-5">
@@ -209,6 +190,7 @@ const Chatbot: React.FC = () => {
                       src={config?.image_url}
                       className="w-24 h-24 mx-auto rounded-full my-6"
                       alt=""
+                      draggable={false}
                     />
                     <p className="my-4 inline-block p-2 rounded-lg max-w-[80%] bg-blue-100 text-gray-800">
                       {config?.greeting_message}
@@ -235,16 +217,14 @@ const Chatbot: React.FC = () => {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.3, delay: index * 0.1 }}
-                          className={`flex ${
-                            msg.isUser ? "justify-end" : "justify-start"
-                          }`}
+                          className={`flex ${msg.isUser ? "justify-end" : "justify-start"
+                            }`}
                         >
                           <span
-                            className={`inline-block p-2 rounded-lg max-w-[80%] ${
-                              msg.isUser
-                                ? "bg-blue-600 text-white"
-                                : "bg-blue-100 text-gray-800"
-                            }`}
+                            className={`inline-block p-2 rounded-lg max-w-[80%] ${msg.isUser
+                              ? "bg-blue-600 text-white"
+                              : "bg-blue-100 text-gray-800"
+                              }`}
                           >
                             {msg.content}
                           </span>

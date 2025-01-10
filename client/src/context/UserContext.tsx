@@ -68,12 +68,6 @@ const UserProvier = ({ children }: { children: ReactNode }) => {
     if (!userId) {
       return null;
     }
-    // const storeConfig = localStorage.getItem("embeddable.config");
-    // if (storeConfig) {
-    //   const parsedConfig = JSON.parse(storeConfig);
-    //   setChatbotConfig(parsedConfig);
-    //   return parsedConfig;
-    // }
     try {
       const res = await api.post("/getbot", { user_id: userId });
       if (res.data.success) {

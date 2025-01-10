@@ -54,6 +54,8 @@ const CreateChatbot: React.FC = () => {
     const { name, value } = e.target;
     setConfig((prev) => ({ ...prev, [name]: value }));
   };
+
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {

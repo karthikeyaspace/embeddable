@@ -1,0 +1,15 @@
+services:
+  - name: client
+    dir: /client
+    command: npm run dev
+    type: server
+
+  - name: server
+    dir: /server
+    command: uvicorn server:app --reload
+    type: server
+
+  - name: chatbot
+    dir: /
+    command: start chatbot.html
+    type: static

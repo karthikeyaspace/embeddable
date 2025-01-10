@@ -23,6 +23,7 @@ def get_user_db(user_id: str) -> dict | None:
 
 # merge
 
+
 def get_user_by_email(email: str) -> dict | None:
     try:
         user = db.collection("embeddable.users").where(

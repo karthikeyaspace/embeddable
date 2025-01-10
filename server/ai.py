@@ -41,23 +41,33 @@ def chatbot(chat: ChatbotModels.ChatRequest) -> str:
                 config['ai_response'] + "\n"
             ai_config_string += text
 
-
         prompt_template = PromptTemplate(
             input_variables=["website_description", "user_message",
                              "previous_user_messages", "ai_configuration"],
-            template=""" You are a customer service representative for a business. 
-            You are chatting with a customer who is asking a question about the business. 
-            You need to provide an answer to the customer's question.
-            For your context, Here is the business description: {website_description}, 
-            Previous Messages of customer: {previous_user_messages},
-            Here is how you shall respond: {ai_configuration}
-            Here is the customer's question you need to respond to: {user_message}
-            Answer:
-            """
-        )
-        
-        print(prev_messages)
+            template="""You are a chatbot acting as a professional representative of a business or individual. 
+                    Your purpose is to provide clear, accurate, and helpful responses to customer inquiries 
+                    while maintaining a natural and conversational tone. You must strictly use the provided information 
+                    for context but have the flexibility to rephrase or enhance the phrasing for improved clarity and grammar, 
+                    ensuring a polished response.
+                    
+                    Guidelines:
+                    1. Rely solely on the provided business description, configuration, and previous conversation history to craft your responses.
+                    2. Rephrase or refine any provided content as needed to make the response natural and grammatically correct while retaining the original intent.
+                    3. Avoid speculative statements, placeholder content.
+                    4. Do not generate code or any unrelated content in your response.
 
+                    Context:
+                    1. Business Description: {website_description}
+                    2. Previous Conversation History (if any): {previous_user_messages}
+                    3. Personalized Chatbot Configuration: {ai_configuration}
+
+                    Customer Question:
+                    {user_message}
+
+                    Using the provided information, craft a professional and well-phrased response to the customer's question. 
+                    Ensure the response aligns with the business tone and avoids unnecessary or irrelevant details.
+                        """)
+        print()
         chain = LLMChain(llm=llm, prompt=prompt_template)
         response = chain.invoke({
             "website_description": description,
